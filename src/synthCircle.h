@@ -41,12 +41,15 @@ public:
         radius = 20;
         hue = (ofRandom(255.0));
         brightness = 255.0;
-        saturation = ((ofRandom(64.0)) + 55.0);
+        saturation = ((ofRandom(64.0)) + 65.0);
         this->setRadius();
         setXYandUpdate(x, y);
         alpha = 128;
         color = new ofColor(0, 0, 0);
         color->setHsb(hue, saturation, brightness);
+        
+        // Limit to non blue colors
+        
         
         pulseWait = 0.5;
         pulseSpeed = 1.5;
@@ -118,7 +121,7 @@ public:
         ofDrawCircle((float)this->getX(), (float)this->getY(), (float)this->getRadius());
         
         float innerRadius;
-        float innerSaturation = this->saturation - 35.0;
+        float innerSaturation = this->saturation - 45.0;
         if (timer > 0.0 && timer < (pulseSpeed)) {
             float timerOffsetCenter = abs(timer - (pulseSpeed / 2));
             innerRadius = (1 - (timerOffsetCenter / (pulseSpeed / 2))) * (0.5 * radius) + (0.4 * radius);

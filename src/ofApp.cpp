@@ -6,6 +6,7 @@ void ofApp::setup(){
     num_circles = 0;
     ofRandom(1337);
     rolling_ptr = 0;
+    connectionState = false;
     
     // Initialize per circle stuff
     for (int i = 0; i < MAX_CIRCLES; i++) {
@@ -54,13 +55,33 @@ void ofApp::setup(){
     ofEnableBlendMode(OF_BLENDMODE_ALPHA);
     ofSetBackgroundAuto(false);
     
+    // Set up background
+    backgroundColor.r = 0;
+    backgroundColor.g = 0;
+    backgroundColor.b = 0;
+    backgroundSaturation = 90.0;
+    backgroundBrightness = 120.0;
+    backgroundHue = 160.0 + ofRandom(50.0);
     
-    ofBackground(0);  // Clear the screen with a black color
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
+    backgroundColor.setBrightness(backgroundBrightness);
+    backgroundColor.setSaturation(backgroundSaturation);
 
+    if (abs(backgroundHue - backgroundColor.getHue()) < 1.0) {
+        backgroundHue = backgroundColor.getHue() + ofRandom(50.0);
+        while (backgroundHue > 210.0)
+            backgroundHue = backgroundHue - 50.0;
+    } else {
+        // Slowly move background hue towards target background hue
+        if (backgroundHue - backgroundColor.getHue() >= 1.0) {
+            backgroundColor.setHue(backgroundColor.getHue() + ofRandom(1.4));
+        } else {
+            backgroundColor.setHue(backgroundColor.getHue() - ofRandom(1.4));
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -69,7 +90,11 @@ void ofApp::draw(){
     
     int wh = ofGetWindowHeight();
     int ww = ofGetWindowWidth();
-    ofSetColor(0,0,0,75);
+    int backgroundRed = backgroundColor.r;
+    int backgroundBlue = backgroundColor.b;
+    int backgroundGreen = backgroundColor.g;
+    
+    ofSetColor(backgroundRed, backgroundGreen, backgroundBlue,75);
     ofDrawRectangle(0,0,ww,wh);
     
     ofPushStyle();
@@ -94,8 +119,6 @@ void ofApp::keyPressed(int key){
         // Attempt to delete the circle that our mouse is over
         for (int i = num_circles - 1; i >= 0; i--) {
             if (circleVector[i]->within(ofGetMouseX(),ofGetMouseY())) {
-                int delayIndex = circleVector[i]->getIndex();
-                delay_id_queue.push(delayIndex);
                 circleVector.erase(circleVector.begin() + i);
                 num_circles = num_circles - 1;
                 return;
@@ -103,16 +126,21 @@ void ofApp::keyPressed(int key){
         }
         
         // Otherwise, delete the least-recent circle we modified
-        int delayIndex = circleVector[0]->getIndex();
-        delay_id_queue.push(circleVector[0]->getIndex());
         circleVector.erase(circleVector.begin());
         num_circles = num_circles - 1;
+    }
+    
+    if (key == 'c') {
+        connectionState = true;
+        
     }
 }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-
+    if (key == 'c') {
+        connectionState = false;
+    }
 }
 
 //--------------------------------------------------------------
@@ -128,40 +156,43 @@ void ofApp::mouseDragged(int x, int y, int button){
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
     int i = 0;
-    
-    // Check if we touched a circle that exists, and update it if so
-    for (i = num_circles - 1; i >= 0; i--) {
-        if (circleVector[i]->within(x,y)) {
-            // push the selected circle so it's drawn on top
-            circleVector.push_back(circleVector[i]);
-            selected_x = circleVector[i]->getX() - x;
-            selected_y = circleVector[i]->getY() - y;
-            circleVector.erase(circleVector.begin() + i);
+    if (connectionState) {
+        
+    }
+    else {
+        // Check if we touched a circle that exists, and update it if so
+        for (i = num_circles - 1; i >= 0; i--) {
+            if (circleVector[i]->within(x,y)) {
+                // push the selected circle so it's drawn on top
+                circleVector.push_back(circleVector[i]);
+                selected_x = circleVector[i]->getX() - x;
+                selected_y = circleVector[i]->getY() - y;
+                circleVector.erase(circleVector.begin() + i);
+                selected_index = num_circles - 1;
+                
+                return;
+            }
+        }
+        
+        // if we've not maxed out the number of delayCircles, draw one
+        if (num_circles < MAX_CIRCLES) {
+            circleVector.push_back(new synthCircle(x, y, sampleRate));
+            selected_index = num_circles;
+            num_circles = num_circles+1;
+            selected_x = 0;
+            selected_y = 0;
+        }
+        
+        // else, pop the head off and update it.
+        else
+        {
+            circleVector.erase(circleVector.begin());
+            circleVector.push_back(new synthCircle(x,y, sampleRate));
             selected_index = num_circles - 1;
-            
-            return;
+            selected_x = 0;
+            selected_y = 0;
         }
     }
-    
-    // if we've not maxed out the number of delayCircles, draw one
-    if (num_circles < MAX_CIRCLES) {
-        circleVector.push_back(new synthCircle(x, y, sampleRate));
-        selected_index = num_circles;
-        num_circles = num_circles+1;
-        selected_x = 0;
-        selected_y = 0;
-    }
-    
-    // else, pop the head off and update it.
-    else
-    {
-        circleVector.erase(circleVector.begin());
-        circleVector.push_back(new synthCircle(x,y, sampleRate));
-        selected_index = num_circles - 1;
-        selected_x = 0;
-        selected_y = 0;
-    }
-    
 }
 
 //--------------------------------------------------------------

@@ -11,7 +11,9 @@ class ofApp : public ofBaseApp{
         int num_circles;
         vector<synthCircle *> circleVector;
         int rolling_ptr;
-        queue<int> delay_id_queue;
+    
+        // When c is pressed
+        bool connectionState;
     
         // For selected circle
         int selected_index;
@@ -26,7 +28,13 @@ class ofApp : public ofBaseApp{
         bool fileLoaded;
         ofSoundStream soundStream;
     
+        // Background color
     
+        ofColor backgroundColor;
+        float backgroundHue;
+        float backgroundSaturation;
+        float backgroundBrightness;
+        
         
         // Vectors for our waveform
         vector<float> audio;
