@@ -27,6 +27,12 @@ private:
     int Window_Height;
     int Sample_Rate;
     
+    // Initialization growth things
+    bool initialized;
+    float initializationTimer;
+    float initializationSpeed; // How quickly to grow
+    float initializationWait; // How long to wait before growing
+    
     float pulseSpeed; // Speed of a pulse (divide by two for opening)
     float pulseWait; // wait in between pulses in secs
     
@@ -39,7 +45,11 @@ public:
         this->Window_Width = ofGetWindowWidth();
         this->Window_Height = ofGetWindowHeight();
         radius = 20;
-        hue = (ofRandom(255.0));
+        // Limit to non blue colors
+        hue = (185.0 + ofRandom(100.0));
+        if (hue > 255.0) {
+            hue = hue - 255.0;
+        }
         brightness = 255.0;
         saturation = ((ofRandom(64.0)) + 65.0);
         this->setRadius();
@@ -48,13 +58,18 @@ public:
         color = new ofColor(0, 0, 0);
         color->setHsb(hue, saturation, brightness);
         
-        // Limit to non blue colors
         
         
-        pulseWait = 0.5;
-        pulseSpeed = 1.5;
+        pulseWait = 0.6 + ofRandom(0.3);
+        pulseSpeed = 1.8 + ofRandom(0.6);
+        
+        initializationWait = 0.1;
+        initializationSpeed = 0.2 + ofRandom(0.4);
         
         timer = 0.0;
+        initializationTimer = 0.0;
+        
+        initialized = false;
     }
     
 
@@ -113,6 +128,20 @@ public:
     
     // Draw the circle
     void draw() {
+        // store the actual radius temporarily, in case we replace while initializing
+        float tempRadius = radius;
+        if (!initialized) {
+            initializationTimer = initializationTimer + (1.0 / ofGetFrameRate());
+            if (initializationTimer > initializationWait + initializationSpeed) {
+                initialized = true;
+            }
+            else if (initializationTimer > initializationWait) {
+                radius = ((initializationTimer - initializationWait) / initializationSpeed) * tempRadius;
+            } else {
+                radius = 0.0;
+            }
+        }
+        
         while (timer > (pulseWait + pulseSpeed)) {
             timer = timer - (pulseWait + pulseSpeed);
         }
@@ -121,7 +150,7 @@ public:
         ofDrawCircle((float)this->getX(), (float)this->getY(), (float)this->getRadius());
         
         float innerRadius;
-        float innerSaturation = this->saturation - 45.0;
+        float innerSaturation = this->saturation / 2.0;
         if (timer > 0.0 && timer < (pulseSpeed)) {
             float timerOffsetCenter = abs(timer - (pulseSpeed / 2));
             innerRadius = (1 - (timerOffsetCenter / (pulseSpeed / 2))) * (0.5 * radius) + (0.4 * radius);
@@ -136,7 +165,7 @@ public:
         ofDrawCircle((float)this->getX(), (float)this->getY(), innerRadius);
         this->color->setHsb(hue, saturation, brightness);
         
-        
+        radius = tempRadius;
     }
     
 };

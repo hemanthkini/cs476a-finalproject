@@ -51,37 +51,43 @@ void ofApp::setup(){
         audio.push_back(0.0);
     }
     
-    // Alpha blend!
-    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+    
     ofSetBackgroundAuto(false);
     
     // Set up background
     backgroundColor.r = 0;
     backgroundColor.g = 0;
     backgroundColor.b = 0;
-    backgroundSaturation = 90.0;
-    backgroundBrightness = 120.0;
-    backgroundHue = 160.0 + ofRandom(50.0);
+    backgroundSaturation = 230.0;
+    backgroundBrightness = 100.0;
+    backgroundHue = 180.0;
+    backgroundColor.setBrightness(backgroundBrightness);
+    backgroundColor.setSaturation(backgroundSaturation);
+    backgroundColor.setHue(backgroundHue);
+    
+    ofLog(OF_LOG_NOTICE, "backgroundcolor.getHue(): %f sat: %f bright: %f", backgroundColor.getHue(), backgroundColor.getBrightness(), backgroundColor.getSaturation());
+    
+    // Alpha blend!
+    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
     
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    backgroundColor.setBrightness(backgroundBrightness);
-    backgroundColor.setSaturation(backgroundSaturation);
-
     if (abs(backgroundHue - backgroundColor.getHue()) < 1.0) {
-        backgroundHue = backgroundColor.getHue() + ofRandom(50.0);
-        while (backgroundHue > 210.0)
-            backgroundHue = backgroundHue - 50.0;
+        backgroundHue = backgroundColor.getHue() + ofRandom(40.0);
+        while (backgroundHue > 200.0) {
+            backgroundHue = backgroundHue - 40.0;
+        }
     } else {
         // Slowly move background hue towards target background hue
         if (backgroundHue - backgroundColor.getHue() >= 1.0) {
-            backgroundColor.setHue(backgroundColor.getHue() + ofRandom(1.4));
+            backgroundColor.setHue(backgroundColor.getHue() + ofRandom(0.5));
         } else {
-            backgroundColor.setHue(backgroundColor.getHue() - ofRandom(1.4));
+            backgroundColor.setHue(backgroundColor.getHue() - ofRandom(0.5));
         }
     }
+  
 }
 
 //--------------------------------------------------------------
@@ -104,9 +110,65 @@ void ofApp::draw(){
         circleVector[i]->draw();
     }
     
-    
+   
     ofPopMatrix();
     ofPopStyle();
+    
+    
+  
+    // Draw connection in
+    if (connectionState) {
+        if (mouseDown) {
+            ofSetLineWidth(2);
+            ofSetColor(255, 255, 255, 200);
+            ofPolyline path = ofPolyline();
+            path.addVertex((float)firstMouseX, (float)firstMouseY, 0);
+            path.addVertex((float)secondMouseX, (float)secondMouseY, 0);
+            
+            path.draw();
+        }
+    }
+    
+    // Draw all connections
+    for (int i = 0; i < connectionVector.size(); i++) {
+        ofSetLineWidth(3);
+        ofSetColor(255, 255, 255, 255);
+        ofPolyline path = ofPolyline();
+        vector<synthCircle *> *currVector = connectionVector[i];
+        path.addVertex((*currVector)[0]->getX(), (*currVector)[0]->getY(), 0);
+        path.addVertex((*currVector)[1]->getX(), (*currVector)[1]->getY(), 0);
+        
+        path.draw();
+    }
+    
+    // Draw text
+    
+    ofSetColor(255, 255, 255, 255);
+    ofDrawBitmapString("click to create/drag circles. d deletes a circle", 10, wh - 20);
+    ofDrawBitmapString("holding down c and dragging between circles CONNECTS them", 10, wh - 8);
+    
+    ofDrawBitmapString("hemanth's reactable thingy", ww - 210, wh - 8);
+}
+
+// Delete all connections assoicated with this circle
+void ofApp::deleteConnections(synthCircle * cir) {
+    stack<int> deletionStack;
+    
+    // Push all the indices of connections in the vector into a stack
+    for (int i = 0; i < connectionVector.size(); i++) {
+        if (((*connectionVector[i])[0] == cir )||((*connectionVector[i])[1] == cir )) {
+            deletionStack.push(i);
+        }
+    }
+    
+    // Delete each connection. 
+    while (!(deletionStack.empty())) {
+        int index = deletionStack.top();
+        deletionStack.pop();
+        vector<synthCircle *> *vecToDelete = connectionVector[index];
+        delete vecToDelete;
+        connectionVector.erase(connectionVector.begin() + index);
+    }
 }
 
 //--------------------------------------------------------------
@@ -119,6 +181,7 @@ void ofApp::keyPressed(int key){
         // Attempt to delete the circle that our mouse is over
         for (int i = num_circles - 1; i >= 0; i--) {
             if (circleVector[i]->within(ofGetMouseX(),ofGetMouseY())) {
+                deleteConnections(circleVector[i]);
                 circleVector.erase(circleVector.begin() + i);
                 num_circles = num_circles - 1;
                 return;
@@ -126,7 +189,11 @@ void ofApp::keyPressed(int key){
         }
         
         // Otherwise, delete the least-recent circle we modified
+        synthCircle * circleToDelete = circleVector[0];
+        deleteConnections(circleToDelete);
+        delete circleToDelete;
         circleVector.erase(circleVector.begin());
+        
         num_circles = num_circles - 1;
     }
     
@@ -150,14 +217,34 @@ void ofApp::mouseMoved(int x, int y ){
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
-    circleVector[selected_index]->setXYandUpdate(x + selected_x,y + selected_y);
+    if (!connectionState) {
+        circleVector[selected_index]->setXYandUpdate(x + selected_x,y + selected_y);
+    } else {
+        secondMouseX = x;
+        secondMouseY = y;
+    }
 }
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
+    mouseDown = true;
     int i = 0;
     if (connectionState) {
+        firstMouseX = x;
+        firstMouseY = y;
         
+        secondMouseX = x;
+        secondMouseY = y;
+        
+        ofLog(OF_LOG_NOTICE, "Connection state and mouse pressed.");
+        for (i = num_circles - 1; i >= 0; i--) {
+            if (circleVector[i]->within(x,y)) {
+                // Put in the connection vector
+                currentConnection = new vector<synthCircle *>();
+                currentConnection->push_back(circleVector[i]);
+                return;
+            }
+        }
     }
     else {
         // Check if we touched a circle that exists, and update it if so
@@ -197,9 +284,30 @@ void ofApp::mousePressed(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-    circleVector.push_back(circleVector[selected_index]);
-    circleVector.erase(circleVector.begin() + selected_index);
-    
+    mouseDown = false;
+    if (connectionState) {
+        // If we've got a live connection that needs a second circle
+        if (currentConnection != NULL && currentConnection->size() > 0) {
+            for (int i = num_circles - 1; i >= 0; i--) {
+                if (circleVector[i]->within(x,y) &&
+                    (*currentConnection)[0] != circleVector[i]) {
+                    // Put in the connection vector, and empty the
+                    // in progress connection
+                    ofLog(OF_LOG_NOTICE, "CONNECTING TWO CIRCLES");
+                    currentConnection->push_back(circleVector[i]);
+                    connectionVector.push_back(currentConnection);
+                    currentConnection = NULL;
+                    return;
+                }
+            }
+            
+        }
+        delete currentConnection;
+        currentConnection = NULL;
+    } else {
+        circleVector.push_back(circleVector[selected_index]);
+        circleVector.erase(circleVector.begin() + selected_index);
+    }
 }
 
 //--------------------------------------------------------------

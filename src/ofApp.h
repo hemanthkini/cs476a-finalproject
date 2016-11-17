@@ -10,10 +10,17 @@ class ofApp : public ofBaseApp{
     private:
         int num_circles;
         vector<synthCircle *> circleVector;
+        vector<vector<synthCircle *> *> connectionVector;
+        vector<synthCircle *> *currentConnection;
         int rolling_ptr;
     
         // When c is pressed
         bool connectionState;
+        bool mouseDown;
+        int firstMouseX;
+        int firstMouseY;
+        int secondMouseX;
+        int secondMouseY;
     
         // For selected circle
         int selected_index;
@@ -58,4 +65,5 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
     
         void audioOut(float * input, int bufferSize, int nChannels);
+        void deleteConnections(synthCircle * cir);
 };
