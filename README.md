@@ -2,7 +2,7 @@
 
 Final project for Music 256a/CS 476a at Stanford. Inspired by the [Reactable](http://reactable.com) and [Deeply](https://ccrma.stanford.edu/~jfarman/256a/final.html). Still trying to nail down my own design and aesthetic for this project.
 
-![Screenshot of the application](milestone1-screenshot.jpg)
+![Screenshot of the application](milestone1-screenshot.png)
 
 hkini [at] stanford
 
