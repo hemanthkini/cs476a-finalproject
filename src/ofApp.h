@@ -35,6 +35,8 @@ class ofApp : public ofBaseApp{
         bool fileLoaded;
         ofSoundStream soundStream;
     
+        stk::NRev reverb;
+    
         // Background color
     
         ofColor backgroundColor;
@@ -46,6 +48,9 @@ class ofApp : public ofBaseApp{
         // Vectors for our waveform
         vector<float> audio;
         vector<float> bufferedAudio;
+    
+        // Lock the circleVector between UI & Audio threads
+        ofMutex circleMutex;
     
 	public:
 		void setup();

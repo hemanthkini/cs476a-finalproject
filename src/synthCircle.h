@@ -28,7 +28,7 @@ private:
     int Sample_Rate;
     
     // Initialization growth things
-    bool initialized;
+    bool initialized = false;
     float initializationTimer;
     float initializationSpeed; // How quickly to grow
     float initializationWait; // How long to wait before growing
@@ -37,6 +37,11 @@ private:
     float pulseWait; // wait in between pulses in secs
     
     float timer; // Used to keep pulses on track
+    
+    // Instrument stuff
+    float frequency;
+    
+    stk::BlowBotl instr;
     
 public:
     synthCircle (int x, int y, int Sample_Rate) {
@@ -69,7 +74,8 @@ public:
         timer = 0.0;
         initializationTimer = 0.0;
         
-        initialized = false;
+        instr.clear();
+        
     }
     
 
@@ -126,6 +132,11 @@ public:
     
     }
     
+    void initializeInstrument() {
+        this->frequency = 220.0 + ofRandom(219.0);
+        instr.noteOn(this->frequency, 1.00);
+    }
+    
     // Draw the circle
     void draw() {
         // store the actual radius temporarily, in case we replace while initializing
@@ -134,6 +145,7 @@ public:
             initializationTimer = initializationTimer + (1.0 / ofGetFrameRate());
             if (initializationTimer > initializationWait + initializationSpeed) {
                 initialized = true;
+                initializeInstrument();
             }
             else if (initializationTimer > initializationWait) {
                 radius = ((initializationTimer - initializationWait) / initializationSpeed) * tempRadius;
@@ -166,6 +178,12 @@ public:
         this->color->setHsb(hue, saturation, brightness);
         
         radius = tempRadius;
+    }
+    
+    stk::StkFloat tick() {
+        if (initialized) {
+            return instr.tick();
+        }
     }
     
 };

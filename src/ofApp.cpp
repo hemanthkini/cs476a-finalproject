@@ -70,6 +70,9 @@ void ofApp::setup(){
     // Alpha blend!
     ofEnableBlendMode(OF_BLENDMODE_ALPHA);
     
+    // Set up reverb
+    reverb.clear();
+    reverb.setT60(2.7);
 }
 
 //--------------------------------------------------------------
@@ -178,23 +181,30 @@ void ofApp::keyPressed(int key){
             return;
         }
         
+        
+        
         // Attempt to delete the circle that our mouse is over
         for (int i = num_circles - 1; i >= 0; i--) {
             if (circleVector[i]->within(ofGetMouseX(),ofGetMouseY())) {
+                // Lock so we don't delete while audio is occuring
+                circleMutex.lock();
                 deleteConnections(circleVector[i]);
                 circleVector.erase(circleVector.begin() + i);
                 num_circles = num_circles - 1;
+                circleMutex.unlock();
                 return;
             }
         }
         
         // Otherwise, delete the least-recent circle we modified
         synthCircle * circleToDelete = circleVector[0];
+        circleMutex.lock();
         deleteConnections(circleToDelete);
         delete circleToDelete;
         circleVector.erase(circleVector.begin());
         
         num_circles = num_circles - 1;
+        circleMutex.unlock();
     }
     
     if (key == 'c') {
@@ -263,7 +273,8 @@ void ofApp::mousePressed(int x, int y, int button){
         
         // if we've not maxed out the number of delayCircles, draw one
         if (num_circles < MAX_CIRCLES) {
-            circleVector.push_back(new synthCircle(x, y, sampleRate));
+            synthCircle* newCircle = new synthCircle(x, y, sampleRate);
+            circleVector.push_back(newCircle);
             selected_index = num_circles;
             num_circles = num_circles+1;
             selected_x = 0;
@@ -273,6 +284,7 @@ void ofApp::mousePressed(int x, int y, int button){
         // else, pop the head off and update it.
         else
         {
+            // TODO copy locking code from adding a circle (above) to here
             circleVector.erase(circleVector.begin());
             circleVector.push_back(new synthCircle(x,y, sampleRate));
             selected_index = num_circles - 1;
@@ -337,18 +349,30 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 void ofApp::audioOut( float * output, int bufferSize, int nChannels ) {
     // TODO get audio playing
-    for(int i = 0; i < bufferSize * nChannels; i += 2) {
-        //output[i] = fileInput.tick(0) * volume; // writing to the left channel
-        //output[i+1] = fileInput.lastOut(1) * volume; // writing to the right channel
-        
-        
-        
-        // Compute each delay
+    circleMutex.lock();
+    for(int i = 0; i < bufferSize * nChannels; i += nChannels) {
+        // Compute each synth
         for (int j = 0; j < num_circles; j++) {
-            
+            output[i] = output[i] + (circleVector[j]->tick() / (float)num_circles);
         }
+        
+        // Compute reverb
+        output[i] = reverb.tick(output[i], 0);
+        
+        // Compute stereo if stereo output is available
+        if (nChannels > 1) {
+            output[i+1] = reverb.lastOut(1);
+        }
+        
+        // Copy over for multichannel - more than two, just copy the excess
+        for (int j = 2; j < nChannels; j++) {
+            output[i+j] = output[i];
+        }
+        
+        // Store audio history
         audio.push_back(output[i]);
         audio.erase(audio.begin());
         
     }
+    circleMutex.unlock();
 }
