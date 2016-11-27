@@ -6,10 +6,12 @@
 //
 //
 
+
+
+#include "ofxStk.h"
+
 #ifndef synthShape_h
 #define synthShape_h
-
-
 
 class synthShape {
 public:
@@ -43,7 +45,11 @@ public:
     int connectionState;
     
     synthShape* connectedParent;
+    synthShape* overallConnectedParent;
 
+    // Instrument stuff
+    float frequency;
+    float originalFrequency;
     
     synthShape (int x, int y, int Sample_Rate) {
         this->x = (float)x;
@@ -75,15 +81,25 @@ public:
         timer = 0.0;
         initializationTimer = 0.0;
         
-        connectionState = 0;
+        connectionState = 1;
+        connectedParent = this;
+        overallConnectedParent = this;
     }
     
     synthShape* getConnectedParent() {
-        return this->getConnectedParent;
+        return this->connectedParent;
     }
     
     void setConnectedParent(synthShape* connectedParent) {
         this->connectedParent = connectedParent;
+    }
+    
+    synthShape* getOverallConnectedParent() {
+        return this->overallConnectedParent;
+    }
+    
+    void setOverallConnectedParent(synthShape* overallConnectedParent) {
+        this->overallConnectedParent = overallConnectedParent;
     }
     
     
@@ -111,6 +127,13 @@ public:
         this->radius = radius;
     }
     
+    int getConnectionState () {
+        return this->connectionState;
+    }
+    
+    void setConnectionState(int connectedState) {
+        this->connectionState = connectedState;
+    }
     
     void setX (int x) {
         this->x = x;
@@ -124,8 +147,19 @@ public:
         return this->index;
     }
     
+    float getFrequency() {
+        return this->frequency;
+    }
     
-    // tells us if the provided location is within the circle
+    float getOriginalFrequency() {
+        return this->originalFrequency;
+    }
+    
+    virtual void setFrequency(float frequency) {
+        this->frequency = frequency;
+    }
+    
+    // tells us if the provided location is within the shape
     bool within (int x, int y) {
         // TODO make this better
         if (abs(x - this->x) < radius && abs(y - this->y) < radius)
@@ -139,17 +173,13 @@ public:
         
     }
     
-    void initializeInstrument() {
-    }
+    // Each of these functions need to be implemented by the child
+    virtual void initializeInstrument() { };
     
     // Draw the circle
-    void draw() {
-
-    }
+    virtual void draw() { };
     
-    stk::StkFloat tick() {
-
-    }
+    virtual stk::StkFloat tick() { };
     
 };
 

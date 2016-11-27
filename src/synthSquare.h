@@ -1,27 +1,31 @@
 //
-//  synthCircle.h
+//  synthSquare.h
 //  cs476a-finalproject
 //
-//  Created by Hemanth Kini on 11/15/16.
+//  Created by Hemanth Kini on 11/27/16.
 //
 //
 
 #include "synthShape.h"
+#include "ofxStk.h"
 
-#ifndef synthCircle_h
-#define synthCircle_h
+#ifndef synthSquare_h
+#define synthSquare_h
 
-class synthCircle : public synthShape {
+#define SQUARE_ROOT_TWO 1.4142135623731
+
+class synthSquare : public synthShape {
 private:
     
 public:
     
-    stk::BlowBotl instr;
     
+    stk::Flute instr;
     
-    synthCircle (int x, int y, int Sample_Rate) :
-    synthShape (x, y, Sample_Rate) {        
+    synthSquare (int x, int y, int Sample_Rate) :
+    synthShape (x, y, Sample_Rate), instr(220) {
         instr.clear();
+        
         
     }
     
@@ -38,7 +42,7 @@ public:
         instr.setFrequency(frequency);
     }
     
-    // Draw the circle
+    // Draw the square
     void draw() override {
         // store the actual radius temporarily, in case we replace while initializing
         float tempRadius = radius;
@@ -60,7 +64,10 @@ public:
         }
         timer = timer + (1.0 / ofGetFrameRate());
         ofSetColor(*color);
-        ofDrawCircle((float)this->getX(), (float)this->getY(), (float)this->getRadius());
+        float length = radius * SQUARE_ROOT_TWO;
+        float left = this->getX() - (length / 2.0);
+        float top = this->getY() - (length / 2.0);
+        ofDrawRectangle(left, top, length, length);
         
         float innerRadius;
         float innerSaturation = this->saturation / 2.0;
@@ -75,9 +82,12 @@ public:
             innerRadius = (0.4 * radius);
         }
         
+        float innerLength = innerRadius * SQUARE_ROOT_TWO;
+        float innerLeft = this->getX() - (innerLength / 2.0);
+        float innerTop = this->getY() - (innerLength / 2.0);
         this->color->setHsb(hue, innerSaturation, brightness);
         ofSetColor(*color);
-        ofDrawCircle((float)this->getX(), (float)this->getY(), innerRadius);
+        ofDrawRectangle(innerLeft, innerTop, innerLength, innerLength);
         this->color->setHsb(hue, saturation, brightness);
         
         radius = tempRadius;
@@ -92,4 +102,5 @@ public:
     }
     
 };
-#endif /* synthCircle_h */
+
+#endif /* synthSquare_h */

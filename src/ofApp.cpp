@@ -3,13 +3,13 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     // initialize circle stuff
-    num_circles = 0;
+    num_shapes = 0;
     ofRandom(1337);
     rolling_ptr = 0;
     connectionState = false;
     
     // Initialize per circle stuff
-    for (int i = 0; i < MAX_CIRCLES; i++) {
+    for (int i = 0; i < MAX_SHAPES; i++) {
         
     }
 
@@ -73,6 +73,8 @@ void ofApp::setup(){
     // Set up reverb
     reverb.clear();
     reverb.setT60(2.7);
+    
+    createSquare = false;
 }
 
 //--------------------------------------------------------------
@@ -109,8 +111,8 @@ void ofApp::draw(){
     ofPushStyle();
     ofPushMatrix();
     
-    for (int i = 0; i < num_circles; i++) {
-        circleVector[i]->draw();
+    for (int i = 0; i < num_shapes; i++) {
+        shapeVector[i]->draw();
     }
     
    
@@ -137,7 +139,7 @@ void ofApp::draw(){
         ofSetLineWidth(3);
         ofSetColor(255, 255, 255, 255);
         ofPolyline path = ofPolyline();
-        vector<synthCircle *> *currVector = connectionVector[i];
+        vector<synthShape *> *currVector = connectionVector[i];
         path.addVertex((*currVector)[0]->getX(), (*currVector)[0]->getY(), 0);
         path.addVertex((*currVector)[1]->getX(), (*currVector)[1]->getY(), 0);
         
@@ -153,14 +155,34 @@ void ofApp::draw(){
     ofDrawBitmapString("hemanth's reactable thingy", ww - 210, wh - 8);
 }
 
-// Delete all connections assoicated with this circle
-void ofApp::deleteConnections(synthCircle * cir) {
+// Delete all connections assoicated with this shape
+void ofApp::deleteConnections(synthShape * cir) {
     stack<int> deletionStack;
     
     // Push all the indices of connections in the vector into a stack
+    // Also, fix up the frequency of hte connectios
     for (int i = 0; i < connectionVector.size(); i++) {
         if (((*connectionVector[i])[0] == cir )||((*connectionVector[i])[1] == cir )) {
             deletionStack.push(i);
+            
+            if ((*connectionVector[i])[0] == cir ) {
+                // If 0 is what we're deleting, and it was 1's parent, orphan 1
+                if ((*connectionVector[i])[1]->getConnectedParent() == (*connectionVector[i])[0]) {
+                    (*connectionVector[i])[1]->setConnectedParent((*connectionVector[i])[1]);
+                    (*connectionVector[i])[1]->setOverallConnectedParent((*connectionVector[i])[1]);
+                    (*connectionVector[i])[1]->setConnectionState(1);
+                    (*connectionVector[i])[1]->setFrequency((*connectionVector[i])[1]->getOriginalFrequency());
+                }
+            } else {
+                // If 1 is what we're deleting, and it was 0's parent, orphan 0.
+                if ((*connectionVector[i])[0]->getConnectedParent() == (*connectionVector[i])[1]) {
+                    (*connectionVector[i])[0]->setConnectedParent((*connectionVector[i])[0]);
+                    (*connectionVector[i])[0]->setOverallConnectedParent((*connectionVector[i])[0]);
+                    (*connectionVector[i])[0]->setConnectionState(1);
+                    (*connectionVector[i])[0]->setFrequency((*connectionVector[i])[0]->getOriginalFrequency());
+                }
+            }
+            
         }
     }
     
@@ -168,7 +190,7 @@ void ofApp::deleteConnections(synthCircle * cir) {
     while (!(deletionStack.empty())) {
         int index = deletionStack.top();
         deletionStack.pop();
-        vector<synthCircle *> *vecToDelete = connectionVector[index];
+        vector<synthShape *> *vecToDelete = connectionVector[index];
         delete vecToDelete;
         connectionVector.erase(connectionVector.begin() + index);
     }
@@ -177,39 +199,42 @@ void ofApp::deleteConnections(synthCircle * cir) {
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     if (key == 'd') {
-        if (num_circles == 0) {
+        if (num_shapes == 0) {
             return;
         }
         
         
-        
         // Attempt to delete the circle that our mouse is over
-        for (int i = num_circles - 1; i >= 0; i--) {
-            if (circleVector[i]->within(ofGetMouseX(),ofGetMouseY())) {
+        for (int i = num_shapes - 1; i >= 0; i--) {
+            if (shapeVector[i]->within(ofGetMouseX(),ofGetMouseY())) {
                 // Lock so we don't delete while audio is occuring
                 circleMutex.lock();
-                deleteConnections(circleVector[i]);
-                circleVector.erase(circleVector.begin() + i);
-                num_circles = num_circles - 1;
+                deleteConnections(shapeVector[i]);
+                shapeVector.erase(shapeVector.begin() + i);
+                num_shapes = num_shapes - 1;
                 circleMutex.unlock();
                 return;
             }
         }
         
         // Otherwise, delete the least-recent circle we modified
-        synthCircle * circleToDelete = circleVector[0];
+        synthShape * circleToDelete = shapeVector[0];
         circleMutex.lock();
         deleteConnections(circleToDelete);
         delete circleToDelete;
-        circleVector.erase(circleVector.begin());
+        shapeVector.erase(shapeVector.begin());
         
-        num_circles = num_circles - 1;
+        num_shapes = num_shapes - 1;
         circleMutex.unlock();
     }
     
     if (key == 'c') {
         connectionState = true;
         
+    }
+    
+    if (key == 's') {
+        createSquare = true;
     }
 }
 
@@ -218,6 +243,11 @@ void ofApp::keyReleased(int key){
     if (key == 'c') {
         connectionState = false;
     }
+    
+    if (key == 's') {
+        createSquare = false;
+    }
+        
 }
 
 //--------------------------------------------------------------
@@ -228,7 +258,7 @@ void ofApp::mouseMoved(int x, int y ){
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
     if (!connectionState) {
-        circleVector[selected_index]->setXYandUpdate(x + selected_x,y + selected_y);
+        shapeVector[selected_index]->setXYandUpdate(x + selected_x,y + selected_y);
     } else {
         secondMouseX = x;
         secondMouseY = y;
@@ -247,36 +277,42 @@ void ofApp::mousePressed(int x, int y, int button){
         secondMouseY = y;
         
         ofLog(OF_LOG_NOTICE, "Connection state and mouse pressed.");
-        for (i = num_circles - 1; i >= 0; i--) {
-            if (circleVector[i]->within(x,y)) {
+        for (i = num_shapes - 1; i >= 0; i--) {
+            if (shapeVector[i]->within(x,y)) {
                 // Put in the connection vector
-                currentConnection = new vector<synthCircle *>();
-                currentConnection->push_back(circleVector[i]);
+                currentConnection = new vector<synthShape *>();
+                currentConnection->push_back(shapeVector[i]);
                 return;
             }
         }
     }
     else {
-        // Check if we touched a circle that exists, and update it if so
-        for (i = num_circles - 1; i >= 0; i--) {
-            if (circleVector[i]->within(x,y)) {
+        // Check if we touched a shape that exists, and update it if so
+        for (i = num_shapes - 1; i >= 0; i--) {
+            if (shapeVector[i]->within(x,y)) {
                 // push the selected circle so it's drawn on top
-                circleVector.push_back(circleVector[i]);
-                selected_x = circleVector[i]->getX() - x;
-                selected_y = circleVector[i]->getY() - y;
-                circleVector.erase(circleVector.begin() + i);
-                selected_index = num_circles - 1;
+                shapeVector.push_back(shapeVector[i]);
+                selected_x = shapeVector[i]->getX() - x;
+                selected_y = shapeVector[i]->getY() - y;
+                shapeVector.erase(shapeVector.begin() + i);
+                selected_index = num_shapes - 1;
                 
                 return;
             }
         }
         
-        // if we've not maxed out the number of delayCircles, draw one
-        if (num_circles < MAX_CIRCLES) {
-            synthCircle* newCircle = new synthCircle(x, y, sampleRate);
-            circleVector.push_back(newCircle);
-            selected_index = num_circles;
-            num_circles = num_circles+1;
+        // if we've not maxed out the number of shapes, draw one
+        if (num_shapes < MAX_SHAPES) {
+            ofLog(OF_LOG_NOTICE, "Drawing dis circle.");
+            synthShape* newShape;
+            if (createSquare) {
+                newShape = new synthSquare(x, y, sampleRate);
+            } else {
+                newShape = new synthCircle(x, y, sampleRate);
+            }
+            shapeVector.push_back(newShape);
+            selected_index = num_shapes;
+            num_shapes = num_shapes+1;
             selected_x = 0;
             selected_y = 0;
         }
@@ -285,13 +321,28 @@ void ofApp::mousePressed(int x, int y, int button){
         else
         {
             // TODO copy locking code from adding a circle (above) to here
-            circleVector.erase(circleVector.begin());
-            circleVector.push_back(new synthCircle(x,y, sampleRate));
-            selected_index = num_circles - 1;
+            shapeVector.erase(shapeVector.begin());
+            if (createSquare) {
+                shapeVector.push_back(new synthSquare(x,y, sampleRate));
+            } else {
+                shapeVector.push_back(new synthCircle(x,y, sampleRate));
+            }
+            selected_index = num_shapes - 1;
             selected_x = 0;
             selected_y = 0;
         }
     }
+}
+
+bool ofApp::existsConnection(synthShape* one, synthShape* two) {
+    for (int i = 0; i < connectionVector.size(); i++) {
+        vector<synthShape *> *currVector = connectionVector[i];
+        if ((*currVector)[0] == one && (*currVector)[1] == two)
+            return true;
+        if ((*currVector)[1] == one && (*currVector)[0] == two)
+            return true;
+    }
+    return false;
 }
 
 //--------------------------------------------------------------
@@ -300,16 +351,36 @@ void ofApp::mouseReleased(int x, int y, int button){
     if (connectionState) {
         // If we've got a live connection that needs a second circle
         if (currentConnection != NULL && currentConnection->size() > 0) {
-            for (int i = num_circles - 1; i >= 0; i--) {
-                if (circleVector[i]->within(x,y) &&
-                    (*currentConnection)[0] != circleVector[i]) {
-                    // Put in the connection vector, and empty the
-                    // in progress connection
-                    ofLog(OF_LOG_NOTICE, "CONNECTING TWO CIRCLES");
-                    currentConnection->push_back(circleVector[i]);
-                    connectionVector.push_back(currentConnection);
-                    currentConnection = NULL;
-                    return;
+            for (int i = num_shapes - 1; i >= 0; i--) {
+                if (shapeVector[i]->within(x,y) &&
+                    (*currentConnection)[0] != shapeVector[i] &&
+                    !existsConnection((*currentConnection)[0], shapeVector[i])) {
+                    if ((*currentConnection)[0]->getOverallConnectedParent() == shapeVector[i]->getOverallConnectedParent()) {
+                        // TODO - animate a red broken line that fades to show no loops
+                        
+                    } else {
+                        // Put in the connection vector, and empty the
+                        // in progress connection
+                        ofLog(OF_LOG_NOTICE, "CONNECTING TWO CIRCLES");
+                        
+                        // Set shape connection stuff
+                        synthShape* childShape = (*currentConnection)[0];
+                        synthShape* parentShape = shapeVector[i];
+                
+                        // update child shape with new parent shape
+                        int newConnectionState = parentShape->getConnectionState() + 1;
+                        childShape->setConnectionState(newConnectionState);
+                        childShape->setConnectedParent(parentShape);
+                        childShape->setOverallConnectedParent(parentShape->getOverallConnectedParent());
+                        float newFrequency = parentShape->getOverallConnectedParent()->getFrequency() * (float)newConnectionState;
+                        
+                        childShape->setFrequency(newFrequency);
+                        
+                        currentConnection->push_back(shapeVector[i]);
+                        connectionVector.push_back(currentConnection);
+                        currentConnection = NULL;
+                        return;
+                    }
                 }
             }
             
@@ -317,8 +388,8 @@ void ofApp::mouseReleased(int x, int y, int button){
         delete currentConnection;
         currentConnection = NULL;
     } else {
-        circleVector.push_back(circleVector[selected_index]);
-        circleVector.erase(circleVector.begin() + selected_index);
+        shapeVector.push_back(shapeVector[selected_index]);
+        shapeVector.erase(shapeVector.begin() + selected_index);
     }
 }
 
@@ -352,8 +423,8 @@ void ofApp::audioOut( float * output, int bufferSize, int nChannels ) {
     circleMutex.lock();
     for(int i = 0; i < bufferSize * nChannels; i += nChannels) {
         // Compute each synth
-        for (int j = 0; j < num_circles; j++) {
-            output[i] = output[i] + (circleVector[j]->tick() / (float)num_circles);
+        for (int j = 0; j < num_shapes; j++) {
+            output[i] = output[i] + (shapeVector[j]->tick() / (float)num_shapes);
         }
         
         // Compute reverb

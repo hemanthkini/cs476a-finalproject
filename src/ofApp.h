@@ -3,19 +3,23 @@
 #include "ofMain.h"
 #include "ofxStk.h"
 #include "synthCircle.h"
+#include "synthSquare.h"
 
-#define MAX_CIRCLES 15
+#define MAX_SHAPES 15
 
 class ofApp : public ofBaseApp{
     private:
-        int num_circles;
-        vector<synthCircle *> circleVector;
-        vector<vector<synthCircle *> *> connectionVector;
-        vector<synthCircle *> *currentConnection;
+        int num_shapes;
+        vector<synthShape *> shapeVector;
+        vector<vector<synthShape *> *> connectionVector;
+        vector<synthShape *> *currentConnection;
         int rolling_ptr;
     
         // When c is pressed
         bool connectionState;
+    
+        // When s is pressed
+        bool createSquare;
         bool mouseDown;
         int firstMouseX;
         int firstMouseY;
@@ -70,5 +74,6 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
     
         void audioOut(float * input, int bufferSize, int nChannels);
-        void deleteConnections(synthCircle * cir);
+        void deleteConnections(synthShape * cir);
+        bool existsConnection(synthShape* one, synthShape* two);
 };

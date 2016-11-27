@@ -209,6 +209,7 @@
 		7FD4A3C17DC04B7726D38D7B /* Sphere.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = Sphere.h; path = ../../../addons/ofxStk/libs/STK/include/Sphere.h; sourceTree = SOURCE_ROOT; };
 		7FDE1AED3DBE81801460A17A /* Envelope.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = Envelope.cpp; path = ../../../addons/ofxStk/libs/STK/src/Envelope.cpp; sourceTree = SOURCE_ROOT; };
 		80BAB9A11DE8D1F8000CEAD0 /* synthShape.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = synthShape.h; sourceTree = "<group>"; };
+		80BAB9A21DEACE13000CEAD0 /* synthSquare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = synthSquare.h; sourceTree = "<group>"; };
 		80DC6CFD1DDBC82000FF4738 /* synthCircle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = synthCircle.h; sourceTree = "<group>"; };
 		81EB70E34712D94E01EEF305 /* Brass.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = Brass.cpp; path = ../../../addons/ofxStk/libs/STK/src/Brass.cpp; sourceTree = SOURCE_ROOT; };
 		8228614E6AE515C40817B51C /* OnePole.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = OnePole.h; path = ../../../addons/ofxStk/libs/STK/include/OnePole.h; sourceTree = SOURCE_ROOT; };
@@ -554,6 +555,7 @@
 				E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */,
 				E4B69E1F0A3A1BDC003C02F2 /* ofApp.h */,
 				80DC6CFD1DDBC82000FF4738 /* synthCircle.h */,
+				80BAB9A21DEACE13000CEAD0 /* synthSquare.h */,
 				80BAB9A11DE8D1F8000CEAD0 /* synthShape.h */,
 			);
 			path = src;
