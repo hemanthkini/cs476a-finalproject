@@ -32,7 +32,7 @@ void ofApp::setup(){
     soundStream.printDeviceList();
     
     // INSERT THE DEVICE YOU WANT TO PLAY ON HERE!
-    soundStream.setDeviceID(4);
+    soundStream.setDeviceID(1);
     
     soundStream.setup(this, 2, 0, sampleRate, bufferSize, 4);
     
@@ -42,7 +42,7 @@ void ofApp::setup(){
     // use ofFmodSetBuffersize(bufferSize) to set the buffersize in fmodx prior to loading a file.
     
     
-    ofSetFrameRate(60);
+    ofSetFrameRate(30);
     stk::Stk::setSampleRate((float)sampleRate);
     
     // Initialize empty audio buffer to draw from.
@@ -74,7 +74,12 @@ void ofApp::setup(){
     reverb.clear();
     reverb.setT60(2.7);
     
+    // Set up high-pass
+    highpassLeft.setPole(-0.7);
+    highpassRight.setPole(-0.7);
+    
     createSquare = false;
+    createTriangle = false;
 }
 
 //--------------------------------------------------------------
@@ -155,34 +160,18 @@ void ofApp::draw(){
     ofDrawBitmapString("hemanth's reactable thingy", ww - 210, wh - 8);
 }
 
-// Delete all connections assoicated with this shape
+// Delete all connections associated with this shape
 void ofApp::deleteConnections(synthShape * cir) {
     stack<int> deletionStack;
     
+    // Delete the set within the vector
+    // Also, fix up the frequency of the connections
+    cir->deleteAllConnections();
+    
     // Push all the indices of connections in the vector into a stack
-    // Also, fix up the frequency of hte connectios
     for (int i = 0; i < connectionVector.size(); i++) {
         if (((*connectionVector[i])[0] == cir )||((*connectionVector[i])[1] == cir )) {
             deletionStack.push(i);
-            
-            if ((*connectionVector[i])[0] == cir ) {
-                // If 0 is what we're deleting, and it was 1's parent, orphan 1
-                if ((*connectionVector[i])[1]->getConnectedParent() == (*connectionVector[i])[0]) {
-                    (*connectionVector[i])[1]->setConnectedParent((*connectionVector[i])[1]);
-                    (*connectionVector[i])[1]->setOverallConnectedParent((*connectionVector[i])[1]);
-                    (*connectionVector[i])[1]->setConnectionState(1);
-                    (*connectionVector[i])[1]->setFrequency((*connectionVector[i])[1]->getOriginalFrequency());
-                }
-            } else {
-                // If 1 is what we're deleting, and it was 0's parent, orphan 0.
-                if ((*connectionVector[i])[0]->getConnectedParent() == (*connectionVector[i])[1]) {
-                    (*connectionVector[i])[0]->setConnectedParent((*connectionVector[i])[0]);
-                    (*connectionVector[i])[0]->setOverallConnectedParent((*connectionVector[i])[0]);
-                    (*connectionVector[i])[0]->setConnectionState(1);
-                    (*connectionVector[i])[0]->setFrequency((*connectionVector[i])[0]->getOriginalFrequency());
-                }
-            }
-            
         }
     }
     
@@ -236,6 +225,10 @@ void ofApp::keyPressed(int key){
     if (key == 's') {
         createSquare = true;
     }
+    
+    if (key == 't') {
+        createTriangle = true;
+    }
 }
 
 //--------------------------------------------------------------
@@ -247,7 +240,10 @@ void ofApp::keyReleased(int key){
     if (key == 's') {
         createSquare = false;
     }
-        
+    
+    if (key == 't') {
+        createTriangle = false;
+    }
 }
 
 //--------------------------------------------------------------
@@ -307,6 +303,8 @@ void ofApp::mousePressed(int x, int y, int button){
             synthShape* newShape;
             if (createSquare) {
                 newShape = new synthSquare(x, y, sampleRate);
+            } else if (createTriangle) {
+                newShape = new synthTriangle(x, y, sampleRate);
             } else {
                 newShape = new synthCircle(x, y, sampleRate);
             }
@@ -366,15 +364,10 @@ void ofApp::mouseReleased(int x, int y, int button){
                         // Set shape connection stuff
                         synthShape* childShape = (*currentConnection)[0];
                         synthShape* parentShape = shapeVector[i];
-                
-                        // update child shape with new parent shape
-                        int newConnectionState = parentShape->getConnectionState() + 1;
-                        childShape->setConnectionState(newConnectionState);
-                        childShape->setConnectedParent(parentShape);
-                        childShape->setOverallConnectedParent(parentShape->getOverallConnectedParent());
-                        float newFrequency = parentShape->getOverallConnectedParent()->getFrequency() * (float)newConnectionState;
                         
-                        childShape->setFrequency(newFrequency);
+                        childShape->connectAndParent(parentShape);
+                        parentShape->connect(childShape);
+                        
                         
                         currentConnection->push_back(shapeVector[i]);
                         connectionVector.push_back(currentConnection);
@@ -430,9 +423,13 @@ void ofApp::audioOut( float * output, int bufferSize, int nChannels ) {
         // Compute reverb
         output[i] = reverb.tick(output[i], 0);
         
+        // Compute high-pass
+        output[i] = highpassLeft.tick(output[i]);
+        
         // Compute stereo if stereo output is available
         if (nChannels > 1) {
             output[i+1] = reverb.lastOut(1);
+            output[i+1] = highpassRight.tick(output[i+1]);
         }
         
         // Copy over for multichannel - more than two, just copy the excess

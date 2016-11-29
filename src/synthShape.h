@@ -18,6 +18,7 @@ public:
     float x;
     float y;
     float radius;
+    float originalRadius;
     int index;
     int Enabled;
     
@@ -47,9 +48,13 @@ public:
     synthShape* connectedParent;
     synthShape* overallConnectedParent;
 
+    set<synthShape *> connectionSet;
+    
     // Instrument stuff
     float frequency;
     float originalFrequency;
+    
+    float ampl;
     
     synthShape (int x, int y, int Sample_Rate) {
         this->x = (float)x;
@@ -57,6 +62,7 @@ public:
         this->Window_Width = ofGetWindowWidth();
         this->Window_Height = ofGetWindowHeight();
         radius = 20;
+        originalRadius = 20;
         // Limit to non blue colors
         hue = (185.0 + ofRandom(100.0));
         if (hue > 255.0) {
@@ -71,7 +77,6 @@ public:
         color->setHsb(hue, saturation, brightness);
         
         
-        
         pulseWait = 0.6 + ofRandom(0.3);
         pulseSpeed = 1.8 + ofRandom(0.6);
         
@@ -84,6 +89,19 @@ public:
         connectionState = 1;
         connectedParent = this;
         overallConnectedParent = this;
+    }
+    
+    
+    float getFrequency() {
+        return this->frequency;
+    }
+    
+    float getOriginalFrequency() {
+        return this->originalFrequency;
+    }
+    
+    virtual void setFrequency(float frequency) {
+        this->frequency = frequency;
     }
     
     synthShape* getConnectedParent() {
@@ -102,6 +120,67 @@ public:
         this->overallConnectedParent = overallConnectedParent;
     }
     
+    
+    int getConnectionState () {
+        return this->connectionState;
+    }
+    
+    void setConnectionState(int connectedState) {
+        this->connectionState = connectedState;
+    }
+    
+    
+    void connectAndParent(synthShape* parent) {
+        // Set parent and overall parent pointers, and in set
+        this->connectionSet.insert(parent);
+        this->setConnectedParent(parent);
+        this->setOverallConnectedParent(parent->getOverallConnectedParent());
+        
+        // Set the new frequency and state as necessary.
+        int newConnectionState = parent->getConnectionState() + 1;
+        this->setConnectionState(newConnectionState);
+        float newFrequency = parent->getOverallConnectedParent()->getFrequency() * (float)newConnectionState;
+        this->setFrequency(newFrequency);
+        
+        // Update all children to treat me as the parent
+        std::set<synthShape *>::iterator it;
+        for (it = this->connectionSet.begin(); it != this->connectionSet.end(); ++it) {
+            if (*it != parent) {
+                (*it)->connectAndParent(this);
+            }
+        }
+    }
+    
+    void connect(synthShape* child) {
+        this->connectionSet.insert(child);
+    }
+    
+    void deleteConnection(synthShape* child) {
+        this->connectionSet.erase(child);
+        
+        if (child == this->getConnectedParent()) {
+            // If the thing we're deleting is our parent, we set ourselves as the parent
+            this->setConnectedParent(this);
+            this->setOverallConnectedParent(this);
+            this->setConnectionState(1);
+            this->setFrequency(this->originalFrequency);
+            
+            // Notify all children that we are the parent.
+            std::set<synthShape *>::iterator it;
+            for (it = this->connectionSet.begin(); it != this->connectionSet.end(); ++it) {
+                (*it)->connectAndParent(this);
+            }
+        }
+    }
+    
+    void deleteAllConnections() {
+        
+        // Delete our connection from all of our neighbors
+        std::set<synthShape *>::iterator it;
+        for (it = this->connectionSet.begin(); it != this->connectionSet.end(); ++it) {
+            (*it)->deleteConnection(this);
+        }
+    }
     
     int getBrightness() {
         return this->brightness;
@@ -126,38 +205,21 @@ public:
     void setRadius (int radius) {
         this->radius = radius;
     }
-    
-    int getConnectionState () {
-        return this->connectionState;
-    }
-    
-    void setConnectionState(int connectedState) {
-        this->connectionState = connectedState;
-    }
-    
+
     void setX (int x) {
         this->x = x;
     }
     
     void setY (int y) {
         this->y = y;
+        updateAmpl();
+        this->setRadius();
     }
     
     int getIndex() {
         return this->index;
     }
-    
-    float getFrequency() {
-        return this->frequency;
-    }
-    
-    float getOriginalFrequency() {
-        return this->originalFrequency;
-    }
-    
-    virtual void setFrequency(float frequency) {
-        this->frequency = frequency;
-    }
+
     
     // tells us if the provided location is within the shape
     bool within (int x, int y) {
@@ -180,6 +242,13 @@ public:
     virtual void draw() { };
     
     virtual stk::StkFloat tick() { };
+    
+    virtual void updateAmpl() {
+        float decimal_downward = ((float)y / (float)Window_Height);
+        decimal_downward = (decimal_downward < 0.1 ? 0 : decimal_downward);
+        
+        ampl = 1.0 - (0.5 * decimal_downward);
+    };
     
 };
 

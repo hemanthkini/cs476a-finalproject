@@ -4,6 +4,7 @@
 #include "ofxStk.h"
 #include "synthCircle.h"
 #include "synthSquare.h"
+#include "synthTriangle.h"
 
 #define MAX_SHAPES 15
 
@@ -20,6 +21,10 @@ class ofApp : public ofBaseApp{
     
         // When s is pressed
         bool createSquare;
+    
+        // When t is pressed
+        bool createTriangle;
+    
         bool mouseDown;
         int firstMouseX;
         int firstMouseY;
@@ -40,6 +45,8 @@ class ofApp : public ofBaseApp{
         ofSoundStream soundStream;
     
         stk::NRev reverb;
+        stk::OnePole highpassLeft;
+        stk::OnePole highpassRight;
     
         // Background color
     
