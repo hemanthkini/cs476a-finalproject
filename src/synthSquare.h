@@ -126,7 +126,6 @@ public:
     stk::StkFloat tick() override {
         
         if (initialized) {
-            //ofLog(OF_LOG_NOTICE, "%f", ampModifier);
             return instr.tick();
         }
     }
