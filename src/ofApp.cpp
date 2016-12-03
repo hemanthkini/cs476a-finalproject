@@ -151,6 +151,19 @@ void ofApp::draw(){
         path.draw();
     }
     
+    // Draw a failed connection
+    if (failedConnectionFlag) {
+        failedConnectionFlag = false;
+        ofSetLineWidth(3);
+        ofSetColor(255, 0, 0, 255);
+        ofPolyline path = ofPolyline();
+        path.addVertex(failedNodeOneX, failedNodeOneY, 0);
+        path.addVertex(failedNodeTwoX, failedNodeTwoY, 0);
+        
+        path.draw();
+
+    }
+    
     // Draw text
     
     ofSetColor(255, 255, 255, 255);
@@ -159,6 +172,22 @@ void ofApp::draw(){
     
     ofDrawBitmapString("hemanth's reactable thingy", ww - 210, wh - 8);
 }
+
+bool ofApp::mouseWithinConnection(int x1, int y1, int x2, int y2,
+                                  int pointX, int pointY) {
+    // Get slope.
+    float slope = ((float)(y2 - y1)) / ((float)(x2 - x1));
+    
+    // Get b.
+    float b = ((float)y2) - ((float) slope * x2);
+    
+    if (abs(((float)pointY) -  (slope * ((float)pointX) + b)) < 5.0) {
+        return true;
+    }
+    return false;
+}
+
+
 
 // Delete all connections associated with this shape
 void ofApp::deleteConnections(synthShape * cir) {
@@ -204,6 +233,23 @@ void ofApp::keyPressed(int key){
                 circleMutex.unlock();
                 return;
             }
+        }
+        
+        for (int i = 0; i < connectionVector.size(); i++) {
+            //if (connectionVector[i][0]->getX()
+            if (mouseWithinConnection((*connectionVector[i])[0]->getX(),
+                                      (*connectionVector[i])[0]->getY(),
+                                      (*connectionVector[i])[1]->getX(),
+                                      (*connectionVector[i])[1]->getY(),
+                                      ofGetMouseX(),ofGetMouseY())) {
+                (*connectionVector[i])[0]->deleteConnection((*connectionVector[i])[1]);
+                (*connectionVector[i])[1]->deleteConnection((*connectionVector[i])[0]);
+                vector<synthShape *> *vecToDelete = connectionVector[i];
+                delete vecToDelete;
+                connectionVector.erase(connectionVector.begin() + i);
+                return;
+            }
+            
         }
         
         // Otherwise, delete the least-recent circle we modified
@@ -355,6 +401,11 @@ void ofApp::mouseReleased(int x, int y, int button){
                     !existsConnection((*currentConnection)[0], shapeVector[i])) {
                     if ((*currentConnection)[0]->getOverallConnectedParent() == shapeVector[i]->getOverallConnectedParent()) {
                         // TODO - animate a red broken line that fades to show no loops
+                        failedConnectionFlag = true;
+                        failedNodeOneX = (*currentConnection)[0]->getX();
+                        failedNodeOneY = (*currentConnection)[0]->getY();
+                        failedNodeTwoX = x;
+                        failedNodeTwoY = y;
                         
                     } else {
                         // Put in the connection vector, and empty the

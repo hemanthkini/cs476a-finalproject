@@ -63,6 +63,14 @@ class ofApp : public ofBaseApp{
         // Lock the circleVector between UI & Audio threads
         ofMutex circleMutex;
     
+        // Deletion link animation
+        bool failedConnectionFlag;
+        int failedNodeOneX;
+        int failedNodeOneY;
+        int failedNodeTwoX;
+        int failedNodeTwoY;
+    
+    
 	public:
 		void setup();
 		void update();
@@ -83,4 +91,6 @@ class ofApp : public ofBaseApp{
         void audioOut(float * input, int bufferSize, int nChannels);
         void deleteConnections(synthShape * cir);
         bool existsConnection(synthShape* one, synthShape* two);
+        bool mouseWithinConnection(int x1, int y1, int x2, int y2,
+                                   int pointX, int pointY);
 };

@@ -39,7 +39,6 @@ public:
     
     void setFrequency(float frequency) override {
         this->frequency = frequency;
-        ofLog(OF_LOG_NOTICE, "new frequency is: %f", frequency);
         instr.setFrequency(frequency);
     }
     
@@ -97,7 +96,6 @@ public:
             if (!barHitThisTime) {
                 instr.strike(ampl);
                 barHitThisTime = true;
-                ofLog(OF_LOG_NOTICE, "Hitting the stuff");
             }
             float ringRadius = radius + (radius - innerRadius);
             float ringLength = ringRadius * SQUARE_ROOT_TWO;

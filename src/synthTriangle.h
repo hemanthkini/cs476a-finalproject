@@ -39,7 +39,6 @@ public:
     
     void setFrequency(float frequency) override {
         this->frequency = frequency;
-        ofLog(OF_LOG_NOTICE, "new frequency is: %f", frequency);
         instr.setFrequency(frequency);
     }
     

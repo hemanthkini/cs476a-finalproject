@@ -40,6 +40,8 @@ public:
     
     float pulseSpeed; // Speed of a pulse (divide by two for opening)
     float pulseWait; // wait in between pulses in secs
+    float originalPulseSpeed;
+    float originalPulseWait;
     
     float timer; // Used to keep pulses on track
     
@@ -79,6 +81,9 @@ public:
         
         pulseWait = 0.6 + ofRandom(0.3);
         pulseSpeed = 1.8 + ofRandom(0.6);
+        originalPulseSpeed = pulseSpeed;
+        originalPulseWait = pulseWait;
+        
         
         initializationWait = 0.1;
         initializationSpeed = 0.2 + ofRandom(0.4);
@@ -131,16 +136,20 @@ public:
     
     
     void connectAndParent(synthShape* parent) {
-        // Set parent and overall parent pointers, and in set
+        // Set parent and overall parent pointers, and insert into set
         this->connectionSet.insert(parent);
         this->setConnectedParent(parent);
         this->setOverallConnectedParent(parent->getOverallConnectedParent());
         
-        // Set the new frequency and state as necessary.
+        // Set the new frequency, pulsespeed/wait and state as necessary.
         int newConnectionState = parent->getConnectionState() + 1;
         this->setConnectionState(newConnectionState);
-        float newFrequency = parent->getOverallConnectedParent()->getFrequency() * (float)newConnectionState;
+        float newFrequency = getOverallConnectedParent()->getFrequency() * (float)newConnectionState;
         this->setFrequency(newFrequency);
+        
+        this->setPulseSpeed(getOverallConnectedParent()->getPulseSpeed());
+        this->setPulseWait(getOverallConnectedParent()->getPulseWait());
+        
         
         // Update all children to treat me as the parent
         std::set<synthShape *>::iterator it;
@@ -155,6 +164,7 @@ public:
         this->connectionSet.insert(child);
     }
     
+    // Delete my connection to this child
     void deleteConnection(synthShape* child) {
         this->connectionSet.erase(child);
         
@@ -164,6 +174,8 @@ public:
             this->setOverallConnectedParent(this);
             this->setConnectionState(1);
             this->setFrequency(this->originalFrequency);
+            this->setPulseSpeed(this->originalPulseSpeed);
+            this->setPulseWait(this->originalPulseWait);
             
             // Notify all children that we are the parent.
             std::set<synthShape *>::iterator it;
@@ -196,6 +208,22 @@ public:
     
     int getY () {
         return this->y;
+    }
+    
+    float getPulseSpeed() {
+        return this->pulseSpeed;
+    }
+    
+    void setPulseSpeed(float pulseSpeed) {
+        this->pulseSpeed = pulseSpeed;
+    }
+    
+    float getPulseWait() {
+        return this->pulseWait;
+    }
+    
+    void setPulseWait(float pulseWait) {
+        this->pulseWait = pulseWait;
     }
     
     int getRadius() {
@@ -232,22 +260,23 @@ public:
     void setXYandUpdate(int x, int y) {
         this->setX(x);
         this->setY(y);
-        
     }
     
     // Each of these functions need to be implemented by the child
     virtual void initializeInstrument() { };
     
-    // Draw the circle
+    // Draw the shape
     virtual void draw() { };
     
+    // Compute one sample of audio
     virtual stk::StkFloat tick() { };
     
+    // Update the amplitude, based on the distance from the top of the page
     virtual void updateAmpl() {
         float decimal_downward = ((float)y / (float)Window_Height);
         decimal_downward = (decimal_downward < 0.1 ? 0 : decimal_downward);
         
-        ampl = 1.0 - (0.5 * decimal_downward);
+        ampl = 1.0 - (0.6 * decimal_downward);
     };
     
 };
