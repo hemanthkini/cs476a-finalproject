@@ -8,9 +8,6 @@
 
 #define MAX_SHAPES 15
 
-#define BUFFER_SIZE 512
-#define VIS_CIRCLES 15
-
 class ofApp : public ofBaseApp{
     private:
         int num_shapes;
@@ -18,8 +15,6 @@ class ofApp : public ofBaseApp{
         vector<vector<synthShape *> *> connectionVector;
         vector<synthShape *> *currentConnection;
         int rolling_ptr;
-    
-        float angle;
     
         // When c is pressed
         bool connectionState;
@@ -64,7 +59,6 @@ class ofApp : public ofBaseApp{
         // Vectors for our waveform
         vector<float> audio;
         vector<float> bufferedAudio;
-        vector<vector<float>> lol;
     
         // Lock the circleVector between UI & Audio threads
         ofMutex circleMutex;
@@ -75,12 +69,6 @@ class ofApp : public ofBaseApp{
         int failedNodeOneY;
         int failedNodeTwoX;
         int failedNodeTwoY;
-    
-        // FFT, mutex, and bins to hold stuff
-        /*ofxFft* fft;
-        
-        ofMutex fftMutex;
-        vector<float> drawBins, middleBins, audioBins; */
     
     
 	public:

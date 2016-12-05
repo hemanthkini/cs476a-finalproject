@@ -1,7 +1,5 @@
 #include "ofApp.h"
 
-#define MY_PIE 3.14159265358979
-
 //--------------------------------------------------------------
 void ofApp::setup(){
     // initialize circle stuff
@@ -25,7 +23,7 @@ void ofApp::setup(){
     // 256 samples per buffer
     // 4 num buffers (latency)
     
-    bufferSize		= BUFFER_SIZE;
+    bufferSize		= 256;
     sampleRate 			= 44100;
     nInputChans         = 2;
     volume				= 0.5f;
@@ -40,6 +38,10 @@ void ofApp::setup(){
     
     
     
+    // on OSX: if you want to use ofSoundPlayer together with ofSoundStream you need to synchronize buffersizes.
+    // use ofFmodSetBuffersize(bufferSize) to set the buffersize in fmodx prior to loading a file.
+    
+    
     ofSetFrameRate(30);
     stk::Stk::setSampleRate((float)sampleRate);
     
@@ -49,23 +51,6 @@ void ofApp::setup(){
         audio.push_back(0.0);
     }
     
-    // Enable vsync
-    ofSetVerticalSync(true);
-    /*
-    // Create FFT
-    fft = ofxFft::create(bufferSize, OF_FFT_WINDOW_HAMMING);
-    
-    // Fft bins initialize.
-    // Initialize empty fft buffer to draw from.
-    drawBins.resize(fft->getBinSize());
-    middleBins.resize(fft->getBinSize());
-    audioBins.resize(fft->getBinSize());
-    */
-    
-    // Initialize empty audio buffer to draw from.
-    for (int i = 0; i < bufferSize + sampleRate; i++) {
-        audio.push_back(0.0);
-    }
     
     ofSetBackgroundAuto(false);
     
@@ -112,22 +97,7 @@ void ofApp::update(){
             backgroundColor.setHue(backgroundColor.getHue() - ofRandom(0.5));
         }
     }
-    
-    // Copy over FFT stuff for drawing
-  /*  fftMutex.lock();
-    drawBins = middleBins;
-    fftMutex.unlock(); */
-    
-    // Normalize drawing bins.
-    /* float maxValue = 0;
-    for(int i = 0; i < fft->getBinSize(); i++) {
-        if(abs(drawBins[i]) > maxValue) {
-            maxValue = abs(drawBins[i]);
-        }
-    }
-    for(int i = 0; i < fft->getBinSize(); i++) {
-        drawBins[i] /= maxValue;
-    } */
+  
 }
 
 //--------------------------------------------------------------
@@ -140,79 +110,20 @@ void ofApp::draw(){
     int backgroundBlue = backgroundColor.b;
     int backgroundGreen = backgroundColor.g;
     
-    
     ofSetColor(backgroundRed, backgroundGreen, backgroundBlue,75);
     ofDrawRectangle(0,0,ww,wh);
-   
-    // Draw FFT.
-    float plotHeight = 128;
-    float offset = 64;
-    float scale = 256;
-   /* ofPushMatrix();
-    ofPushStyle();
-    ofNoFill();
     
-    ofSetColor(255, 255, 255, 200);
-    int n = drawBins.size();
-    ofDrawRectangle(0, 0, n, plotHeight);
-    ofBeginShape();
-    for (int i = 0; i < n; i++) {
-        ofVertex(i, sqrt(drawBins[i]) * scale);
-    }
-    ofEndShape();
-    ofPopStyle();
-    ofPopMatrix(); */
-    
-    
-    // Draw main audio visualization
- /*   float waveform_height   = 0.5 * wh;
-    float waveform_width = 0.5 * ww;
-    
-    ofPushStyle();
-    ofPushMatrix();
-    
-    ofTranslate(waveform_width, waveform_height, 0);
-    
-    ofSetLineWidth(5);
-    ofNoFill();
-    int radius = (wh < ww ? wh / 6 : ww / 6);
-    int extension = radius * 2;
-    ofSetColor(47, 245, 60, 164);
-    ofBeginShape();
-    int circleLen = sampleRate / ((unsigned int)ofGetTargetFrameRate());
-    //int circleLen = drawBins.size();
-    
-    float incr = MY_PIE * 2.0 / ((float)(circleLen));
-    
-    for (unsigned int i = 0; i < circleLen; i++){
-        float amp = audio[bufferSize + sampleRate - (i+1)];
-        float ampRadius = extension * amp +radius;
-        // Can replace amp with summed, normalized amp (over buffersize) for cool effect
-        //float ampRadius = (sqrt(drawBins[i]) * scale) +radius;
-        ofVertex(ampRadius * cos(this->angle),
-                 ampRadius * sin(this->angle),
-                 0);
-        this->angle = this->angle + incr;
-        
-    }
-    
-    ofEndShape(true);
-    
-    ofPopMatrix();
-    ofPopStyle(); */
-    
-    this->angle = 0;
-    
-    // Draw each shape instrument
     ofPushStyle();
     ofPushMatrix();
     
     for (int i = 0; i < num_shapes; i++) {
         shapeVector[i]->draw();
     }
+    
    
     ofPopMatrix();
     ofPopStyle();
+    
     
   
     // Draw connection in
@@ -252,7 +163,6 @@ void ofApp::draw(){
         path.draw();
 
     }
-
     
     // Draw text
     
@@ -435,6 +345,7 @@ void ofApp::mousePressed(int x, int y, int button){
         
         // if we've not maxed out the number of shapes, draw one
         if (num_shapes < MAX_SHAPES) {
+            ofLog(OF_LOG_NOTICE, "Drawing dis circle.");
             synthShape* newShape;
             if (createSquare) {
                 newShape = new synthSquare(x, y, sampleRate);
@@ -552,11 +463,10 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 }
 
 void ofApp::audioOut( float * output, int bufferSize, int nChannels ) {
-    // Play audio while computing FFT/storing audio history
+    // TODO get audio playing
     circleMutex.lock();
     for(int i = 0; i < bufferSize * nChannels; i += nChannels) {
         // Compute each synth
-        output[i] = 0.0;
         for (int j = 0; j < num_shapes; j++) {
             output[i] = output[i] + (shapeVector[j]->tick() / (float)num_shapes);
         }
@@ -584,12 +494,4 @@ void ofApp::audioOut( float * output, int bufferSize, int nChannels ) {
         
     }
     circleMutex.unlock();
-    
-    // Process fft and store.
- /*   fft->setSignal(fftInput);
-    float* curFft = fft->getAmplitude();
-    //memcpy(&audioBins[0], curFft, sizeof(float) * fft->getBinSize());
-    fftMutex.lock();
-    middleBins = audioBins;
-    fftMutex.unlock(); */
 }
