@@ -80,6 +80,17 @@ void ofApp::setup(){
     
     createSquare = false;
     createTriangle = false;
+    
+    // Set up background noise
+ 
+    
+    noiseLevel = 4.85;
+    noiseFrequency = 1.25;
+    noiseSpeed = 0.6;
+    smooth[1].setSmooth(0.899);
+    smooth[2].setSmooth(0.899);
+    smooth[3].setSmooth(0.899);
+
 }
 
 //--------------------------------------------------------------
@@ -97,11 +108,27 @@ void ofApp::update(){
             backgroundColor.setHue(backgroundColor.getHue() - ofRandom(0.5));
         }
     }
+    
+    // Update background noise
+    float lowValue = smooth[1].tick(ofMap(abs(audio[bufferSize+sampleRate - 10]), 0, 1, 0, noiseLevel));
+    float midValue = smooth[2].tick(ofMap(abs(audio[bufferSize+sampleRate - 47]), 0, 1, 0, noiseLevel));
+    float highValue = smooth[3].tick(ofMap(abs(audio[bufferSize+sampleRate - 73]), 0, 1, 0, noiseLevel * 2));
+    //ofLog(OF_LOG_NOTICE, "%f", highValue);
+    
+    noise.mul.set(lowValue, midValue, highValue);
+    noise.add.set(lowValue, midValue, highValue);
+    noise.freqR.set(noiseFrequency, noiseFrequency);
+    noise.freqG.set(noiseFrequency * 2.0, noiseFrequency * 2.0);
+    noise.freqB.set(noiseFrequency * 4.0, noiseFrequency * 4.0);
+    noise.speed.set(noiseSpeed, noiseSpeed * 1.2, noiseSpeed * 1.5);
+    
   
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
+    // Draw noise
+        noise.draw();
     // Redraw background for motion blur
     
     int wh = ofGetWindowHeight();
@@ -110,9 +137,13 @@ void ofApp::draw(){
     int backgroundBlue = backgroundColor.b;
     int backgroundGreen = backgroundColor.g;
     
-    ofSetColor(backgroundRed, backgroundGreen, backgroundBlue,75);
+    ofSetColor(backgroundRed, backgroundGreen, backgroundBlue,185);
     ofDrawRectangle(0,0,ww,wh);
     
+
+
+    
+    // Draw shapes
     ofPushStyle();
     ofPushMatrix();
     
@@ -167,10 +198,12 @@ void ofApp::draw(){
     // Draw text
     
     ofSetColor(255, 255, 255, 255);
-    ofDrawBitmapString("click to create/drag circles. d deletes a circle", 10, wh - 20);
+    ofDrawBitmapString("holding s will create a square, t will create a triangle.", 10, wh - 32);
+    ofDrawBitmapString("click to create/drag SHAPES (circles by default).", 10, wh - 44);
+    ofDrawBitmapString("tapping d while hovering over a CONNECTION or SHAPE deletes it.", 10, wh-20);
     ofDrawBitmapString("holding down c and dragging between circles CONNECTS them", 10, wh - 8);
     
-    ofDrawBitmapString("hemanth's reactable thingy", ww - 210, wh - 8);
+    ofDrawBitmapString("SHAPE SEA", ww - 80, wh - 8);
 }
 
 bool ofApp::mouseWithinConnection(int x1, int y1, int x2, int y2,
@@ -181,7 +214,8 @@ bool ofApp::mouseWithinConnection(int x1, int y1, int x2, int y2,
     // Get b.
     float b = ((float)y2) - ((float) slope * x2);
     
-    if (abs(((float)pointY) -  (slope * ((float)pointX) + b)) < 5.0) {
+    if (abs(((float)pointY) -  (slope * ((float)pointX) + b)) < 5.0 ||
+        abs((((float)pointY - b) / slope) - (float)pointX) < 5.0) {
         return true;
     }
     return false;
@@ -468,7 +502,7 @@ void ofApp::audioOut( float * output, int bufferSize, int nChannels ) {
     for(int i = 0; i < bufferSize * nChannels; i += nChannels) {
         // Compute each synth
         for (int j = 0; j < num_shapes; j++) {
-            output[i] = output[i] + (shapeVector[j]->tick() / (float)num_shapes);
+            output[i] = output[i] + (shapeVector[j]->tick() / sqrt((float)num_shapes * .8));
         }
         
         // Compute reverb

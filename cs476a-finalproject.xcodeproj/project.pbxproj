@@ -35,6 +35,7 @@
 		5C308AF4A777EAA8C47032C9 /* StifKarp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8405F47E613657EEB8811AD0 /* StifKarp.cpp */; };
 		5CFC8C294C4EDB17A569A7E2 /* FMVoices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E79FD724FED2608DAC985DD8 /* FMVoices.cpp */; };
 		60E81E9A1B6A54248E53A444 /* Modal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FD0EE00FA862D53D0E23109 /* Modal.cpp */; };
+		63BD1BC78670772ECBAF3AD6 /* ofxGLSLSimplexNoise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 088524F4004485D09274D0C9 /* ofxGLSLSimplexNoise.cpp */; };
 		6B93C25D9BE71D3458B32A79 /* Skini.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 731DAEE6ECE6459D5E4EAB29 /* Skini.cpp */; };
 		6CE1F3C8BCEF5B150D9CF289 /* Rhodey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5B1B023BF8E07CFFAE6481C /* Rhodey.cpp */; };
 		6EB498E5295E2FC58868771B /* BlitSaw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 09181785F5BB902663FCC71B /* BlitSaw.cpp */; };
@@ -126,6 +127,7 @@
 		06B3623EC49744C8EB089711 /* Granulate.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = Granulate.h; path = ../../../addons/ofxStk/libs/STK/include/Granulate.h; sourceTree = SOURCE_ROOT; };
 		07EBD663EA82F0C0090958B6 /* Noise.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = Noise.h; path = ../../../addons/ofxStk/libs/STK/include/Noise.h; sourceTree = SOURCE_ROOT; };
 		07F5B45DF57D7362E9CD7202 /* Stk.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = Stk.h; path = ../../../addons/ofxStk/libs/STK/include/Stk.h; sourceTree = SOURCE_ROOT; };
+		088524F4004485D09274D0C9 /* ofxGLSLSimplexNoise.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxGLSLSimplexNoise.cpp; path = ../../../addons/ofxGLSLSimplexNoise/src/ofxGLSLSimplexNoise.cpp; sourceTree = SOURCE_ROOT; };
 		08CC032A8605506D8FDBF0EE /* BeeThree.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = BeeThree.h; path = ../../../addons/ofxStk/libs/STK/include/BeeThree.h; sourceTree = SOURCE_ROOT; };
 		09181785F5BB902663FCC71B /* BlitSaw.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = BlitSaw.cpp; path = ../../../addons/ofxStk/libs/STK/src/BlitSaw.cpp; sourceTree = SOURCE_ROOT; };
 		0AEA40A9BF98684608818FFE /* VoicForm.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = VoicForm.cpp; path = ../../../addons/ofxStk/libs/STK/src/VoicForm.cpp; sourceTree = SOURCE_ROOT; };
@@ -162,6 +164,7 @@
 		327763928E4B1802CA062006 /* Delay.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = Delay.h; path = ../../../addons/ofxStk/libs/STK/include/Delay.h; sourceTree = SOURCE_ROOT; };
 		36F6E3347C261D592D466E35 /* Resonate.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = Resonate.cpp; path = ../../../addons/ofxStk/libs/STK/src/Resonate.cpp; sourceTree = SOURCE_ROOT; };
 		37CCCCAFCF47D72BEC3912F3 /* Whistle.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = Whistle.h; path = ../../../addons/ofxStk/libs/STK/include/Whistle.h; sourceTree = SOURCE_ROOT; };
+		391E78422263D3CE5D457B2A /* synthShape.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = synthShape.h; path = src/synthShape.h; sourceTree = SOURCE_ROOT; };
 		3B36E5F2A876CBACF2103EDB /* FileRead.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = FileRead.h; path = ../../../addons/ofxStk/libs/STK/include/FileRead.h; sourceTree = SOURCE_ROOT; };
 		3FED27273172C5AD1006D2D7 /* Moog.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = Moog.cpp; path = ../../../addons/ofxStk/libs/STK/src/Moog.cpp; sourceTree = SOURCE_ROOT; };
 		406F8DCDEFA4B57B0365390D /* Modulate.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = Modulate.cpp; path = ../../../addons/ofxStk/libs/STK/src/Modulate.cpp; sourceTree = SOURCE_ROOT; };
@@ -206,12 +209,10 @@
 		7C70A381C58D8342ACF4ACD6 /* Granulate.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = Granulate.cpp; path = ../../../addons/ofxStk/libs/STK/src/Granulate.cpp; sourceTree = SOURCE_ROOT; };
 		7D88CEB0FFAB57D43C36DD30 /* DelayA.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = DelayA.h; path = ../../../addons/ofxStk/libs/STK/include/DelayA.h; sourceTree = SOURCE_ROOT; };
 		7E4505054E3F86D661C61162 /* BiQuad.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = BiQuad.h; path = ../../../addons/ofxStk/libs/STK/include/BiQuad.h; sourceTree = SOURCE_ROOT; };
+		7F695FA1755C73D7AA55D25A /* ofxGLSLSimplexNoise.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxGLSLSimplexNoise.h; path = ../../../addons/ofxGLSLSimplexNoise/src/ofxGLSLSimplexNoise.h; sourceTree = SOURCE_ROOT; };
 		7FD4A3C17DC04B7726D38D7B /* Sphere.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = Sphere.h; path = ../../../addons/ofxStk/libs/STK/include/Sphere.h; sourceTree = SOURCE_ROOT; };
 		7FDE1AED3DBE81801460A17A /* Envelope.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = Envelope.cpp; path = ../../../addons/ofxStk/libs/STK/src/Envelope.cpp; sourceTree = SOURCE_ROOT; };
-		800948AB1DED098100945F66 /* synthTriangle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = synthTriangle.h; sourceTree = "<group>"; };
-		80BAB9A11DE8D1F8000CEAD0 /* synthShape.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = synthShape.h; sourceTree = "<group>"; };
-		80BAB9A21DEACE13000CEAD0 /* synthSquare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = synthSquare.h; sourceTree = "<group>"; };
-		80DC6CFD1DDBC82000FF4738 /* synthCircle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = synthCircle.h; sourceTree = "<group>"; };
+		80898F7B1DF63C4D0080E205 /* Smooth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Smooth.h; sourceTree = "<group>"; };
 		81EB70E34712D94E01EEF305 /* Brass.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = Brass.cpp; path = ../../../addons/ofxStk/libs/STK/src/Brass.cpp; sourceTree = SOURCE_ROOT; };
 		8228614E6AE515C40817B51C /* OnePole.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = OnePole.h; path = ../../../addons/ofxStk/libs/STK/include/OnePole.h; sourceTree = SOURCE_ROOT; };
 		8405F47E613657EEB8811AD0 /* StifKarp.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = StifKarp.cpp; path = ../../../addons/ofxStk/libs/STK/src/StifKarp.cpp; sourceTree = SOURCE_ROOT; };
@@ -220,9 +221,12 @@
 		89D1567F256BF97DF5A7EF37 /* Asymp.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = Asymp.h; path = ../../../addons/ofxStk/libs/STK/include/Asymp.h; sourceTree = SOURCE_ROOT; };
 		8A55957DFFB42CE17B2BFEB6 /* Twang.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = Twang.cpp; path = ../../../addons/ofxStk/libs/STK/src/Twang.cpp; sourceTree = SOURCE_ROOT; };
 		8AC16D3962349323068F9428 /* FileWvOut.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = FileWvOut.h; path = ../../../addons/ofxStk/libs/STK/include/FileWvOut.h; sourceTree = SOURCE_ROOT; };
+		8BC91A336B8B6D1B5902727C /* synthTriangle.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = synthTriangle.h; path = src/synthTriangle.h; sourceTree = SOURCE_ROOT; };
 		8D4720D5E8D958A7B7728141 /* BlitSquare.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = BlitSquare.cpp; path = ../../../addons/ofxStk/libs/STK/src/BlitSquare.cpp; sourceTree = SOURCE_ROOT; };
 		8E5A02B75803075B9006F1DB /* ofxStk.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxStk.h; path = ../../../addons/ofxStk/src/ofxStk.h; sourceTree = SOURCE_ROOT; };
+		8F72CD2948B512BF78FE35FE /* synthCircle.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = synthCircle.h; path = src/synthCircle.h; sourceTree = SOURCE_ROOT; };
 		90DEA21A2E833ECEF401AEA7 /* Shakers.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = Shakers.h; path = ../../../addons/ofxStk/libs/STK/include/Shakers.h; sourceTree = SOURCE_ROOT; };
+		9237C0861A74920EC3B1E5FF /* synthSquare.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = synthSquare.h; path = src/synthSquare.h; sourceTree = SOURCE_ROOT; };
 		977BEDCC99B45312B5691829 /* SKINItbl.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = SKINItbl.h; path = ../../../addons/ofxStk/libs/STK/include/SKINItbl.h; sourceTree = SOURCE_ROOT; };
 		998A39C1ED1C2F44FCD3C02D /* Generator.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = Generator.h; path = ../../../addons/ofxStk/libs/STK/include/Generator.h; sourceTree = SOURCE_ROOT; };
 		9A7AE7862E3F45D41AD34126 /* BlowBotl.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = BlowBotl.cpp; path = ../../../addons/ofxStk/libs/STK/src/BlowBotl.cpp; sourceTree = SOURCE_ROOT; };
@@ -398,6 +402,15 @@
 			name = src;
 			sourceTree = "<group>";
 		};
+		4414B905B162A23A1C5F5806 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				088524F4004485D09274D0C9 /* ofxGLSLSimplexNoise.cpp */,
+				7F695FA1755C73D7AA55D25A /* ofxGLSLSimplexNoise.h */,
+			);
+			name = src;
+			sourceTree = "<group>";
+		};
 		548082D8A1FA2CFD716CDF40 /* STK */ = {
 			isa = PBXGroup;
 			children = (
@@ -405,6 +418,14 @@
 				16B6C202C8F3CB113835D51F /* src */,
 			);
 			name = STK;
+			sourceTree = "<group>";
+		};
+		6687B7424BF7E30901C5F3BD /* ofxGLSLSimplexNoise */ = {
+			isa = PBXGroup;
+			children = (
+				4414B905B162A23A1C5F5806 /* src */,
+			);
+			name = ofxGLSLSimplexNoise;
 			sourceTree = "<group>";
 		};
 		6948EE371B920CB800B5AC1A /* local_addons */ = {
@@ -523,6 +544,7 @@
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				6687B7424BF7E30901C5F3BD /* ofxGLSLSimplexNoise */,
 				ED7E97A03D055738C1920624 /* ofxStk */,
 			);
 			name = addons;
@@ -552,13 +574,14 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				80898F7B1DF63C4D0080E205 /* Smooth.h */,
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
 				E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */,
 				E4B69E1F0A3A1BDC003C02F2 /* ofApp.h */,
-				80DC6CFD1DDBC82000FF4738 /* synthCircle.h */,
-				80BAB9A21DEACE13000CEAD0 /* synthSquare.h */,
-				800948AB1DED098100945F66 /* synthTriangle.h */,
-				80BAB9A11DE8D1F8000CEAD0 /* synthShape.h */,
+				8F72CD2948B512BF78FE35FE /* synthCircle.h */,
+				391E78422263D3CE5D457B2A /* synthShape.h */,
+				9237C0861A74920EC3B1E5FF /* synthSquare.h */,
+				8BC91A336B8B6D1B5902727C /* synthTriangle.h */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -678,6 +701,7 @@
 			files = (
 				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
 				E4B69E210A3A1BDC003C02F2 /* ofApp.cpp in Sources */,
+				63BD1BC78670772ECBAF3AD6 /* ofxGLSLSimplexNoise.cpp in Sources */,
 				45720293C72287B5647D65DF /* ADSR.cpp in Sources */,
 				18C87B79F123241DD15D7B11 /* Asymp.cpp in Sources */,
 				8CE778365651401D8F1B52C2 /* BandedWG.cpp in Sources */,
@@ -790,6 +814,8 @@
 				GCC_WARN_UNUSED_VARIABLE = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(OF_CORE_HEADERS)",
+					src,
+					../../../addons/ofxGLSLSimplexNoise/src,
 					../../../addons/ofxStk/libs,
 					../../../addons/ofxStk/libs/STK,
 					../../../addons/ofxStk/libs/STK/include,
@@ -828,6 +854,8 @@
 				GCC_WARN_UNUSED_VARIABLE = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(OF_CORE_HEADERS)",
+					src,
+					../../../addons/ofxGLSLSimplexNoise/src,
 					../../../addons/ofxStk/libs,
 					../../../addons/ofxStk/libs/STK,
 					../../../addons/ofxStk/libs/STK/include,
@@ -859,6 +887,8 @@
 				GCC_MODEL_TUNING = NONE;
 				HEADER_SEARCH_PATHS = (
 					"$(OF_CORE_HEADERS)",
+					src,
+					../../../addons/ofxGLSLSimplexNoise/src,
 					../../../addons/ofxStk/libs,
 					../../../addons/ofxStk/libs/STK,
 					../../../addons/ofxStk/libs/STK/include,
@@ -890,6 +920,8 @@
 				GCC_MODEL_TUNING = NONE;
 				HEADER_SEARCH_PATHS = (
 					"$(OF_CORE_HEADERS)",
+					src,
+					../../../addons/ofxGLSLSimplexNoise/src,
 					../../../addons/ofxStk/libs,
 					../../../addons/ofxStk/libs/STK,
 					../../../addons/ofxStk/libs/STK/include,

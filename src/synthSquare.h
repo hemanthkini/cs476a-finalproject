@@ -124,7 +124,7 @@ public:
     stk::StkFloat tick() override {
         
         if (initialized) {
-            return instr.tick();
+            return instr.tick() * 1.3;
         }
     }
     

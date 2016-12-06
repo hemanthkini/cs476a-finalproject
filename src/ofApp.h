@@ -5,6 +5,8 @@
 #include "synthCircle.h"
 #include "synthSquare.h"
 #include "synthTriangle.h"
+#include "ofxGLSLSimplexNoise.h"
+#include "Smooth.h"
 
 #define MAX_SHAPES 15
 
@@ -69,6 +71,13 @@ class ofApp : public ofBaseApp{
         int failedNodeOneY;
         int failedNodeTwoX;
         int failedNodeTwoY;
+
+        // background noise
+        ofxGLSLSimplexNoise noise;
+    float noiseFrequency;
+    float noiseSpeed;
+    float noiseLevel;
+    Smooth smooth[3];
     
     
 	public:

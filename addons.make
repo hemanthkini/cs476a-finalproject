@@ -1,1 +1,2 @@
+ofxGLSLSimplexNoise
 ofxStk
