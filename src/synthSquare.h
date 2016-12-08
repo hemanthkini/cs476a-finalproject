@@ -46,6 +46,7 @@ public:
     void draw() override {
         // store the actual radius temporarily, in case we replace while initializing
         float tempRadius = radius;
+        // Check to see if the square has initialized itself yet, and set that up.
         if (!initialized) {
             initializationTimer = initializationTimer + (1.0 / ofGetFrameRate());
             if (initializationTimer > initializationWait + initializationSpeed) {
@@ -59,10 +60,13 @@ public:
             }
         }
         
+        // Reset at the end of a period.
         while (timer > (pulseWait + pulseSpeed)) {
             timer = timer - (pulseWait + pulseSpeed);
             barHitThisTime = false;
         }
+        
+        // Drawing code.
         timer = timer + (1.0 / ofGetFrameRate());
         ofSetColor(*color);
         float length = radius * SQUARE_ROOT_TWO;

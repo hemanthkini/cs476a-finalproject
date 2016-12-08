@@ -74,10 +74,10 @@ class ofApp : public ofBaseApp{
 
         // background noise
         ofxGLSLSimplexNoise noise;
-    float noiseFrequency;
-    float noiseSpeed;
-    float noiseLevel;
-    Smooth smooth[3];
+        float noiseFrequency;
+        float noiseSpeed;
+        float noiseLevel;
+        Smooth smooth[3];
     
     
 	public:

@@ -42,7 +42,7 @@ public:
         instr.setFrequency(frequency);
     }
     
-    // Draw the square
+    // Draw the triangle
     void draw() override {
         // store the actual radius temporarily, in case we replace while initializing
         float tempRadius = radius;

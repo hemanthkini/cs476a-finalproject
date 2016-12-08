@@ -58,6 +58,7 @@ public:
     
     float ampl;
     
+    // Set up overall shape design.
     synthShape (int x, int y, int Sample_Rate) {
         this->x = (float)x;
         this->y = (float)y;
@@ -78,13 +79,13 @@ public:
         color = new ofColor(0, 0, 0);
         color->setHsb(hue, saturation, brightness);
         
-        
+        // Set up pulsing.
         pulseWait = 0.6 + ofRandom(0.3);
         pulseSpeed = 1.8 + ofRandom(0.6);
         originalPulseSpeed = pulseSpeed;
         originalPulseWait = pulseWait;
         
-        
+        // Set up initial initialization growth.
         initializationWait = 0.1;
         initializationSpeed = 0.2 + ofRandom(0.4);
         
@@ -134,7 +135,7 @@ public:
         this->connectionState = connectedState;
     }
     
-    
+    // Connect a shape to this shape, and set that one as this one's parent.
     void connectAndParent(synthShape* parent) {
         // Set parent and overall parent pointers, and insert into set
         this->connectionSet.insert(parent);
@@ -160,6 +161,7 @@ public:
         }
     }
     
+    // Connect a shape to this shape.
     void connect(synthShape* child) {
         this->connectionSet.insert(child);
     }
@@ -251,7 +253,6 @@ public:
     
     // tells us if the provided location is within the shape
     bool within (int x, int y) {
-        // TODO make this better
         if (abs(x - this->x) < radius && abs(y - this->y) < radius)
             return true;
         return false;

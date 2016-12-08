@@ -32,9 +32,9 @@ void ofApp::setup(){
     soundStream.printDeviceList();
     
     // INSERT THE DEVICE YOU WANT TO PLAY ON HERE!
-    soundStream.setDeviceID(1);
+    soundStream.setDeviceID(4);
     
-    soundStream.setup(this, 2, 0, sampleRate, bufferSize, 4);
+    soundStream.setup(this, 2, 0, sampleRate, bufferSize, 1);
     
     
     
@@ -81,8 +81,7 @@ void ofApp::setup(){
     createSquare = false;
     createTriangle = false;
     
-    // Set up background noise
- 
+    // Set up background noise and smoothing
     
     noiseLevel = 4.85;
     noiseFrequency = 1.25;
@@ -97,6 +96,7 @@ void ofApp::setup(){
 void ofApp::update(){
     if (abs(backgroundHue - backgroundColor.getHue()) < 1.0) {
         backgroundHue = backgroundColor.getHue() + ofRandom(40.0);
+        // Keep the base background hue constrained to a bluish color
         while (backgroundHue > 200.0) {
             backgroundHue = backgroundHue - 40.0;
         }
@@ -110,6 +110,7 @@ void ofApp::update(){
     }
     
     // Update background noise
+    // We apply smoothing filters so that the input doesn't jump and generate 'ugly' noise
     float lowValue = smooth[1].tick(ofMap(abs(audio[bufferSize+sampleRate - 10]), 0, 1, 0, noiseLevel));
     float midValue = smooth[2].tick(ofMap(abs(audio[bufferSize+sampleRate - 47]), 0, 1, 0, noiseLevel));
     float highValue = smooth[3].tick(ofMap(abs(audio[bufferSize+sampleRate - 73]), 0, 1, 0, noiseLevel * 2));
@@ -140,8 +141,6 @@ void ofApp::draw(){
     ofSetColor(backgroundRed, backgroundGreen, backgroundBlue,185);
     ofDrawRectangle(0,0,ww,wh);
     
-
-
     
     // Draw shapes
     ofPushStyle();
@@ -150,14 +149,12 @@ void ofApp::draw(){
     for (int i = 0; i < num_shapes; i++) {
         shapeVector[i]->draw();
     }
-    
    
     ofPopMatrix();
     ofPopStyle();
     
     
-  
-    // Draw connection in
+    // Draw connection in progress
     if (connectionState) {
         if (mouseDown) {
             ofSetLineWidth(2);
@@ -182,6 +179,7 @@ void ofApp::draw(){
         path.draw();
     }
     
+    
     // Draw a failed connection
     if (failedConnectionFlag) {
         failedConnectionFlag = false;
@@ -195,8 +193,8 @@ void ofApp::draw(){
 
     }
     
-    // Draw text
     
+    // Draw text
     ofSetColor(255, 255, 255, 255);
     ofDrawBitmapString("holding s will create a square, t will create a triangle.", 10, wh - 32);
     ofDrawBitmapString("click to create/drag SHAPES (circles by default).", 10, wh - 44);
@@ -206,6 +204,7 @@ void ofApp::draw(){
     ofDrawBitmapString("SHAPE SEA", ww - 80, wh - 8);
 }
 
+// Figure out if the mouse is hovering over (near) a connection.
 bool ofApp::mouseWithinConnection(int x1, int y1, int x2, int y2,
                                   int pointX, int pointY) {
     // Get slope.
@@ -251,6 +250,7 @@ void ofApp::deleteConnections(synthShape * cir) {
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     if (key == 'd') {
+        // Don't delete anything if there are no shapes.
         if (num_shapes == 0) {
             return;
         }
@@ -269,8 +269,9 @@ void ofApp::keyPressed(int key){
             }
         }
         
+        
+        // Try to delete a connection.
         for (int i = 0; i < connectionVector.size(); i++) {
-            //if (connectionVector[i][0]->getX()
             if (mouseWithinConnection((*connectionVector[i])[0]->getX(),
                                       (*connectionVector[i])[0]->getY(),
                                       (*connectionVector[i])[1]->getX(),
@@ -297,15 +298,18 @@ void ofApp::keyPressed(int key){
         circleMutex.unlock();
     }
     
+    // Set the connection flag.
     if (key == 'c') {
         connectionState = true;
         
     }
     
+    // Set the square creation flag.
     if (key == 's') {
         createSquare = true;
     }
     
+    // Set the triangle creation flag.
     if (key == 't') {
         createTriangle = true;
     }
@@ -333,9 +337,11 @@ void ofApp::mouseMoved(int x, int y ){
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
+    // If we aren't setting a connection, move the selected shape.
     if (!connectionState) {
         shapeVector[selected_index]->setXYandUpdate(x + selected_x,y + selected_y);
     } else {
+        // Save the coordinates to create a connection.
         secondMouseX = x;
         secondMouseY = y;
     }
@@ -345,6 +351,9 @@ void ofApp::mouseDragged(int x, int y, int button){
 void ofApp::mousePressed(int x, int y, int button){
     mouseDown = true;
     int i = 0;
+    
+    // Handle connections.
+    // If we're trying to connect two shapes, set that up.
     if (connectionState) {
         firstMouseX = x;
         firstMouseY = y;
@@ -352,7 +361,6 @@ void ofApp::mousePressed(int x, int y, int button){
         secondMouseX = x;
         secondMouseY = y;
         
-        ofLog(OF_LOG_NOTICE, "Connection state and mouse pressed.");
         for (i = num_shapes - 1; i >= 0; i--) {
             if (shapeVector[i]->within(x,y)) {
                 // Put in the connection vector
@@ -379,7 +387,6 @@ void ofApp::mousePressed(int x, int y, int button){
         
         // if we've not maxed out the number of shapes, draw one
         if (num_shapes < MAX_SHAPES) {
-            ofLog(OF_LOG_NOTICE, "Drawing dis circle.");
             synthShape* newShape;
             if (createSquare) {
                 newShape = new synthSquare(x, y, sampleRate);
@@ -412,6 +419,7 @@ void ofApp::mousePressed(int x, int y, int button){
     }
 }
 
+// Check if a connection exists between the two shapes.
 bool ofApp::existsConnection(synthShape* one, synthShape* two) {
     for (int i = 0; i < connectionVector.size(); i++) {
         vector<synthShape *> *currVector = connectionVector[i];
@@ -430,11 +438,16 @@ void ofApp::mouseReleased(int x, int y, int button){
         // If we've got a live connection that needs a second circle
         if (currentConnection != NULL && currentConnection->size() > 0) {
             for (int i = num_shapes - 1; i >= 0; i--) {
+                // We verify that the mouse is released over a second circle that isn't
+                // the one we started with, and that we aren't already connected to.
                 if (shapeVector[i]->within(x,y) &&
                     (*currentConnection)[0] != shapeVector[i] &&
                     !existsConnection((*currentConnection)[0], shapeVector[i])) {
+                    // If we are already connected...
                     if ((*currentConnection)[0]->getOverallConnectedParent() == shapeVector[i]->getOverallConnectedParent()) {
-                        // TODO - animate a red broken line that fades to show no loops
+                        // ...set up to animate a red broken line that fades
+                        // This provides the user with visual feedback that they can't
+                        // connect an already connected pair of circles.
                         failedConnectionFlag = true;
                         failedNodeOneX = (*currentConnection)[0]->getX();
                         failedNodeOneY = (*currentConnection)[0]->getY();
@@ -444,7 +457,6 @@ void ofApp::mouseReleased(int x, int y, int button){
                     } else {
                         // Put in the connection vector, and empty the
                         // in progress connection
-                        ofLog(OF_LOG_NOTICE, "CONNECTING TWO CIRCLES");
                         
                         // Set shape connection stuff
                         synthShape* childShape = (*currentConnection)[0];
